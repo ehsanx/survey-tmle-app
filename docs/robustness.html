@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Robustness &amp; sensitivity – Cross-Fitted Survey-Weighted TMLE</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-31fb93f9f2cda8112f59f58ac82d739a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link href="site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+
+<script src="site_libs/plotly-binding-4.12.0/plotly.js"></script>
+
+<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
+
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+
+<link href="site_libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
+
+<script src="site_libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+
+<link href="site_libs/plotly-htmlwidgets-css-2.25.2/plotly-htmlwidgets.css" rel="stylesheet">
+
+<script src="site_libs/plotly-main-2.25.2/plotly-latest.min.js"></script>
+
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+
+<script src="site_libs/datatables-binding-0.34.0/datatables.js"></script>
+
+<link href="site_libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+
+<link href="site_libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet">
+
+<script src="site_libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+
+<link href="site_libs/nouislider-7.0.10/jquery.nouislider.min.css" rel="stylesheet">
+
+<script src="site_libs/nouislider-7.0.10/jquery.nouislider.min.js"></script>
+
+<link href="site_libs/selectize-0.12.0/selectize.bootstrap3.css" rel="stylesheet">
+
+<script src="site_libs/selectize-0.12.0/selectize.min.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Cross-Fitted Survey-Weighted TMLE</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./simulation.html"> 
+<span class="menu-text">Simulation</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./nhanes.html"> 
+<span class="menu-text">NHANES</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./robustness.html" aria-current="page"> 
+<span class="menu-text">Robustness</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./methods.html"> 
+<span class="menu-text">Methods</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#robustness-to-informative-selection" id="toc-robustness-to-informative-selection" class="nav-link active" data-scroll-target="#robustness-to-informative-selection">Robustness to informative selection</a></li>
+  <li><a href="#finite-population-correction" id="toc-finite-population-correction" class="nav-link" data-scroll-target="#finite-population-correction">Finite-population correction</a></li>
+  <li><a href="#high-design-effect-stress-design-c" id="toc-high-design-effect-stress-design-c" class="nav-link" data-scroll-target="#high-design-effect-stress-design-c">High design-effect stress (Design C)</a></li>
+  <li><a href="#jackknife-versus-linearization-variance" id="toc-jackknife-versus-linearization-variance" class="nav-link" data-scroll-target="#jackknife-versus-linearization-variance">Jackknife versus linearization variance</a></li>
+  <li><a href="#variance-method-benchmark-web-appendix-g" id="toc-variance-method-benchmark-web-appendix-g" class="nav-link" data-scroll-target="#variance-method-benchmark-web-appendix-g">Variance-method benchmark (Web Appendix G)</a>
+  <ul class="collapse">
+  <li><a href="#six-variance-routes-web-table-s35" id="toc-six-variance-routes-web-table-s35" class="nav-link" data-scroll-target="#six-variance-routes-web-table-s35">Six variance routes (Web Table S35)</a></li>
+  <li><a href="#compute-landscape-web-table-s36" id="toc-compute-landscape-web-table-s36" class="nav-link" data-scroll-target="#compute-landscape-web-table-s36">Compute landscape (Web Table S36)</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-page-left" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Robustness &amp; sensitivity</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta column-page-left">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Method-robustness checks on <strong>synthetic data with known truth</strong> — each stresses the recommended estimator on a design feature the headline simulation holds fixed. Use the <strong>Figure / Table</strong> toggle in each to switch between the picture and the numbers.</p>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Coverage shading.</strong> Cells are <strong>green</strong> at/above 0.935 (near nominal), <strong>amber</strong> 0.90–0.935 (slightly low), and <strong>red</strong> below 0.90 (collapsed); the nominal target is 0.95.</p>
+</div>
+</div>
+</div>
+<section id="robustness-to-informative-selection" class="level2">
+<h2 class="anchored" data-anchor-id="robustness-to-informative-selection">Robustness to informative selection</h2>
+<p>When selection is informative <strong>beyond</strong> the measured confounders, the de-weighted out-of-fold fits still hold: coverage stays near nominal across the sweep of the informativeness parameter <span class="math inline">\(\rho\)</span>. <em>(Web Table S33)</em></p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Figure</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Table</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell">
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-f317e32e973f2e085cbc" style="width:100%;height:288px;"></div>
+<script type="application/json" data-for="htmlwidget-f317e32e973f2e085cbc">{"x":{"data":[{"x":[0,0.29999999999999999,0.59999999999999998,0.90000000000000002],"y":[0.94479999999999997,0.94299999999999995,0.91900000000000004,0.92800000000000005],"text":["Fully-Aware-CF (unweighted OOF)<br />coverage = 0.945","Fully-Aware-CF (unweighted OOF)<br />coverage = 0.943","Fully-Aware-CF (unweighted OOF)<br />coverage = 0.919","Fully-Aware-CF (unweighted OOF)<br />coverage = 0.928"],"type":"scatter","mode":"lines+markers","line":{"width":2.2677165354330708,"color":"rgba(86,180,233,1)","dash":"solid"},"hoveron":"points","name":"Fully-Aware-CF (unweighted OOF)","legendgroup":"Fully-Aware-CF (unweighted OOF)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(86,180,233,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(86,180,233,1)"}},"frame":null},{"x":[0,0.29999999999999999,0.59999999999999998,0.90000000000000002],"y":[0.94099999999999995,0.93799999999999994,0.92900000000000005,0.92900000000000005],"text":["Fully-Aware-CF (unweighted OOF)<br />coverage = 0.941","Fully-Aware-CF (unweighted OOF)<br />coverage = 0.938","Fully-Aware-CF (unweighted OOF)<br />coverage = 0.929","Fully-Aware-CF (unweighted OOF)<br />coverage = 0.929"],"type":"scatter","mode":"lines+markers","line":{"width":2.2677165354330708,"color":"rgba(86,180,233,1)","dash":"solid"},"hoveron":"points","name":"Fully-Aware-CF (unweighted OOF)","legendgroup":"Fully-Aware-CF (unweighted OOF)","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(86,180,233,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(86,180,233,1)"}},"frame":null},{"x":[0,0.29999999999999999,0.59999999999999998,0.90000000000000002],"y":[0.94879999999999998,0.94999999999999996,0.92800000000000005,0.91900000000000004],"text":["Fully-Aware-CF (weighted OOF)<br />coverage = 0.949","Fully-Aware-CF (weighted OOF)<br />coverage = 0.950","Fully-Aware-CF (weighted OOF)<br />coverage = 0.928","Fully-Aware-CF (weighted OOF)<br />coverage = 0.919"],"type":"scatter","mode":"lines+markers","line":{"width":2.2677165354330708,"color":"rgba(0,114,178,1)","dash":"solid"},"hoveron":"points","name":"Fully-Aware-CF (weighted OOF)","legendgroup":"Fully-Aware-CF (weighted OOF)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(0,114,178,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,114,178,1)"}},"frame":null},{"x":[0,0.29999999999999999,0.59999999999999998,0.90000000000000002],"y":[0.94399999999999995,0.94499999999999995,0.93200000000000005,0.92800000000000005],"text":["Fully-Aware-CF (weighted OOF)<br />coverage = 0.944","Fully-Aware-CF (weighted OOF)<br />coverage = 0.945","Fully-Aware-CF (weighted OOF)<br />coverage = 0.932","Fully-Aware-CF (weighted OOF)<br />coverage = 0.928"],"type":"scatter","mode":"lines+markers","line":{"width":2.2677165354330708,"color":"rgba(0,114,178,1)","dash":"solid"},"hoveron":"points","name":"Fully-Aware-CF (weighted OOF)","legendgroup":"Fully-Aware-CF (weighted OOF)","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(0,114,178,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,114,178,1)"}},"frame":null},{"x":[-0.045000000000000005,0.94500000000000006],"y":[0.94999999999999996,0.94999999999999996],"text":"","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(140,140,140,1)","dash":"dash"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.045000000000000005,0.94500000000000006],"y":[0.94999999999999996,0.94999999999999996],"text":"","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(140,140,140,1)","dash":"dash"},"hoveron":"points","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":36.722291407222919,"r":7.9701120797011216,"b":80,"l":53.399750933997524},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243},"xaxis":{"domain":[0,0.49654074996540748],"automargin":true,"type":"linear","autorange":false,"range":[-0.045000000000000005,0.94500000000000006],"tickmode":"array","ticktext":["0.00","0.25","0.50","0.75"],"tickvals":[0,0.24999999999999997,0.5,0.75],"categoryorder":"array","categoryarray":["0.00","0.25","0.50","0.75"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.72455564360919278,"zeroline":false,"anchor":"y","title":"","hoverformat":".2f"},"annotations":[{"text":"informativeness ρ","x":0.5,"y":0,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"top","annotationType":"axis","yshift":-23.910336239103373},{"text":"95% CI coverage","x":0,"y":0.5,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243},"xref":"paper","yref":"paper","textangle":-90,"xanchor":"right","yanchor":"center","annotationType":"axis","xshift":-36.662515566625167},{"text":"L2: + smooth learners","x":0.24827037498270374,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":12.7521793275218},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"L3: + random forest","x":0.75172962501729623,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":12.7521793275218},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"}],"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.050000000000000003,1.05],"tickmode":"array","ticktext":["0.00","0.25","0.50","0.75","1.00"],"tickvals":[0,0.25,0.5,0.75,1],"categoryorder":"array","categoryarray":["0.00","0.25","0.50","0.75","1.00"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.72455564360919289,"zeroline":false,"anchor":"x","title":"","hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":0.49654074996540748,"y0":0,"y1":25.5043586550436,"yanchor":1,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","layer":"below","x0":0.50345925003459246,"x1":1,"y0":0,"y1":25.5043586550436,"yanchor":1,"ysizemode":"pixel"}],"xaxis2":{"type":"linear","autorange":false,"range":[-0.045000000000000005,0.94500000000000006],"tickmode":"array","ticktext":["0.00","0.25","0.50","0.75"],"tickvals":[0,0.24999999999999997,0.5,0.75],"categoryorder":"array","categoryarray":["0.00","0.25","0.50","0.75"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0.50345925003459246,1],"gridcolor":"rgba(235,235,235,1)","gridwidth":0.72455564360919278,"zeroline":false,"anchor":"y","title":"","hoverformat":".2f"},"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":12.7521793275218},"orientation":"h","x":0.5,"y":-0.20000000000000001,"xanchor":"center","yanchor":"top","title":{"text":"Arm","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"5b44240b68b6":{"x":{},"y":{},"colour":{},"text":{},"type":"scatter"},"5b445d55604":{"x":{},"y":{},"colour":{},"text":{}},"5b444cff76e6":{"yintercept":{}}},"cur_data":"5b44240b68b6","visdat":{"5b44240b68b6":["function (y) ","x"],"5b445d55604":["function (y) ","x"],"5b444cff76e6":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="cell">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-f2dfc83ac2d81fabc9a8" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-f2dfc83ac2d81fabc9a8">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"0.9\" data-scale=\"1\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.0059\" data-max=\"0.0136\" data-scale=\"4\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.8946\" data-max=\"1.0339\" data-scale=\"4\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.919\" data-max=\"0.95\" data-scale=\"4\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","caption":"<caption>Robustness to informative selection beyond the confounders (Web Table S33).<\/caption>","data":[[0,0,0.3,0.3,0.6,0.6,0.9,0.9,0,0,0.3,0.3,0.6,0.6,0.9,0.9],["L2: + smooth learners","L2: + smooth learners","L2: + smooth learners","L2: + smooth learners","L2: + smooth learners","L2: + smooth learners","L2: + smooth learners","L2: + smooth learners","L3: + random forest","L3: + random forest","L3: + random forest","L3: + random forest","L3: + random forest","L3: + random forest","L3: + random forest","L3: + random forest"],["Fully-Aware-CF (unweighted OOF)","Fully-Aware-CF (weighted OOF)","Fully-Aware-CF (unweighted OOF)","Fully-Aware-CF (weighted OOF)","Fully-Aware-CF (unweighted OOF)","Fully-Aware-CF (weighted OOF)","Fully-Aware-CF (unweighted OOF)","Fully-Aware-CF (weighted OOF)","Fully-Aware-CF (unweighted OOF)","Fully-Aware-CF (weighted OOF)","Fully-Aware-CF (unweighted OOF)","Fully-Aware-CF (weighted OOF)","Fully-Aware-CF (unweighted OOF)","Fully-Aware-CF (weighted OOF)","Fully-Aware-CF (unweighted OOF)","Fully-Aware-CF (weighted OOF)"],[0.0136,0.0119,0.0118,0.0119,0.0102,0.0114,0.0074,0.0095,0.0123,0.0102,0.011,0.0109,0.008999999999999999,0.0102,0.0059,0.008200000000000001],[1.0183,1.0256,1.0106,1.0339,0.9394,0.9514,0.9103,0.8946,1.0136,1.0184,1.0039,1.0298,0.9486,0.9562,0.9218,0.9113],[0.9448,0.9488,0.9429999999999999,0.95,0.919,0.928,0.928,0.919,0.9409999999999999,0.944,0.9379999999999999,0.945,0.929,0.9320000000000001,0.929,0.928]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>rho<\/th>\n      <th>Rung<\/th>\n      <th>Arm<\/th>\n      <th>Bias<\/th>\n      <th>SE/SD<\/th>\n      <th>Coverage<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":12,"scrollX":true,"order":[],"autoWidth":false,"columnDefs":[{"targets":0,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"targets":3,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"targets":4,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"targets":5,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"className":"dt-right","targets":[0,3,4,5]},{"name":"rho","targets":0},{"name":"Rung","targets":1},{"name":"Arm","targets":2},{"name":"Bias","targets":3},{"name":"SE/SD","targets":4},{"name":"Coverage","targets":5}],"orderClasses":false,"orderCellsTop":true,"lengthMenu":[10,12,25,50,100],"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[5]; $(this.api().cell(row, 5).node()).css({'background-color':isNaN(parseFloat(value)) ? '' : value <= 0.9 ? \"#F6D9C9\" : value <= 0.935 ? \"#FFF3CD\" : \"#D6F0DB\"});\n}"}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render","options.columnDefs.2.render","options.columnDefs.3.render","options.rowCallback"],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="finite-population-correction" class="level2">
+<h2 class="anchored" data-anchor-id="finite-population-correction">Finite-population correction</h2>
+<p>Omitting the finite-population correction (FPC) does <strong>not</strong> over-cover when the sampling fraction is non-negligible — coverage is calibrated and flat in the fraction, confirming the no-correction variance is the safe, conservative choice. <em>(Web Table S25)</em></p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Figure</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Table</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="cell">
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-8d0e6c02805d702e7b2a" style="width:100%;height:288px;"></div>
+<script type="application/json" data-for="htmlwidget-8d0e6c02805d702e7b2a">{"x":{"data":[{"x":[1,2],"y":[0.93200000000000005,0.93899999999999995],"text":["Fully-Aware<br />coverage = 0.932","Fully-Aware<br />coverage = 0.939"],"type":"scatter","mode":"lines+markers","line":{"width":2.2677165354330708,"color":"rgba(213,94,0,1)","dash":"solid"},"hoveron":"points","name":"Fully-Aware","legendgroup":"Fully-Aware","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(213,94,0,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(213,94,0,1)"}},"frame":null},{"x":[1,2],"y":[0.877,0.89800000000000002],"text":["Fully-Aware<br />coverage = 0.877","Fully-Aware<br />coverage = 0.898"],"type":"scatter","mode":"lines+markers","line":{"width":2.2677165354330708,"color":"rgba(213,94,0,1)","dash":"solid"},"hoveron":"points","name":"Fully-Aware","legendgroup":"Fully-Aware","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(213,94,0,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(213,94,0,1)"}},"frame":null},{"x":[1,2],"y":[0.91700000000000004,0.93600000000000005],"text":["Fully-Aware-CF<br />coverage = 0.917","Fully-Aware-CF<br />coverage = 0.936"],"type":"scatter","mode":"lines+markers","line":{"width":2.2677165354330708,"color":"rgba(0,114,178,1)","dash":"solid"},"hoveron":"points","name":"Fully-Aware-CF","legendgroup":"Fully-Aware-CF","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(0,114,178,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,114,178,1)"}},"frame":null},{"x":[1,2],"y":[0.86499999999999999,0.879],"text":["Fully-Aware-CF<br />coverage = 0.865","Fully-Aware-CF<br />coverage = 0.879"],"type":"scatter","mode":"lines+markers","line":{"width":2.2677165354330708,"color":"rgba(0,114,178,1)","dash":"solid"},"hoveron":"points","name":"Fully-Aware-CF","legendgroup":"Fully-Aware-CF","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(0,114,178,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,114,178,1)"}},"frame":null},{"x":[0.40000000000000002,2.6000000000000001],"y":[0.94999999999999996,0.94999999999999996],"text":"","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(140,140,140,1)","dash":"dash"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.40000000000000002,2.6000000000000001],"y":[0.94999999999999996,0.94999999999999996],"text":"","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(140,140,140,1)","dash":"dash"},"hoveron":"points","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":36.722291407222919,"r":7.9701120797011216,"b":80,"l":53.399750933997524},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243},"xaxis":{"domain":[0,0.49654074996540748],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,2.6000000000000001],"tickmode":"array","ticktext":["L1","L2"],"tickvals":[1,2],"categoryorder":"array","categoryarray":["L1","L2"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.72455564360919278,"zeroline":false,"anchor":"y","title":"","hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.050000000000000003,1.05],"tickmode":"array","ticktext":["0.00","0.25","0.50","0.75","1.00"],"tickvals":[0,0.25,0.5,0.75,1],"categoryorder":"array","categoryarray":["0.00","0.25","0.50","0.75","1.00"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.72455564360919289,"zeroline":false,"anchor":"x","title":"","hoverformat":".2f"},"annotations":[{"text":"95% CI coverage","x":0,"y":0.5,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243},"xref":"paper","yref":"paper","textangle":-90,"xanchor":"right","yanchor":"center","annotationType":"axis","xshift":-36.662515566625167},{"text":"no FPC","x":0.24827037498270374,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":12.7521793275218},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"with FPC","x":0.75172962501729623,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":12.7521793275218},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"}],"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":0.49654074996540748,"y0":0,"y1":25.5043586550436,"yanchor":1,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","layer":"below","x0":0.50345925003459246,"x1":1,"y0":0,"y1":25.5043586550436,"yanchor":1,"ysizemode":"pixel"}],"xaxis2":{"type":"linear","autorange":false,"range":[0.40000000000000002,2.6000000000000001],"tickmode":"array","ticktext":["L1","L2"],"tickvals":[1,2],"categoryorder":"array","categoryarray":["L1","L2"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0.50345925003459246,1],"gridcolor":"rgba(235,235,235,1)","gridwidth":0.72455564360919278,"zeroline":false,"anchor":"y","title":"","hoverformat":".2f"},"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":12.7521793275218},"orientation":"h","x":0.5,"y":-0.20000000000000001,"xanchor":"center","yanchor":"top","title":{"text":"Arm","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"5b447abf2b9b":{"x":{},"y":{},"colour":{},"text":{},"type":"scatter"},"5b448fc49e9":{"x":{},"y":{},"colour":{},"text":{}},"5b4441251ddd":{"yintercept":{}}},"cur_data":"5b447abf2b9b","visdat":{"5b447abf2b9b":["function (y) ","x"],"5b448fc49e9":["function (y) ","x"],"5b4441251ddd":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-eb3bc20b5c175cbea56e" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-eb3bc20b5c175cbea56e">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.8513\" data-max=\"1.0081\" data-scale=\"4\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.865\" data-max=\"0.939\" data-scale=\"3\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","caption":"<caption>Finite-population-correction robustness (Web Table S25).<\/caption>","data":[["Design B (2 PSUs/stratum, NHANES-like)","Design B (2 PSUs/stratum, NHANES-like)","Design B (2 PSUs/stratum, NHANES-like)","Design B (2 PSUs/stratum, NHANES-like)","Design B (2 PSUs/stratum, NHANES-like)","Design B (2 PSUs/stratum, NHANES-like)","Design B (2 PSUs/stratum, NHANES-like)","Design B (2 PSUs/stratum, NHANES-like)"],["L1: GLM","L1: GLM","L1: GLM","L1: GLM","L2: + smooth learners","L2: + smooth learners","L2: + smooth learners","L2: + smooth learners"],["Fully-Aware","Fully-Aware","Fully-Aware-CF","Fully-Aware-CF","Fully-Aware","Fully-Aware","Fully-Aware-CF","Fully-Aware-CF"],["no","yes","no","yes","no","yes","no","yes"],[1.0081,0.8731,0.983,0.8512999999999999,0.9867,0.8545,1.0016,0.8673999999999999],[0.9320000000000001,0.877,0.917,0.865,0.9389999999999999,0.898,0.9360000000000001,0.879]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Scenario<\/th>\n      <th>Rung<\/th>\n      <th>Arm<\/th>\n      <th>FPC<\/th>\n      <th>SE/SD<\/th>\n      <th>Coverage<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"scrollX":true,"order":[],"autoWidth":false,"columnDefs":[{"targets":4,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"targets":5,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"className":"dt-right","targets":[4,5]},{"name":"Scenario","targets":0},{"name":"Rung","targets":1},{"name":"Arm","targets":2},{"name":"FPC","targets":3},{"name":"SE/SD","targets":4},{"name":"Coverage","targets":5}],"orderClasses":false,"orderCellsTop":true,"lengthMenu":[8,10,25,50,100],"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[5]; $(this.api().cell(row, 5).node()).css({'background-color':isNaN(parseFloat(value)) ? '' : value <= 0.9 ? \"#F6D9C9\" : value <= 0.935 ? \"#FFF3CD\" : \"#D6F0DB\"});\n}"}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render","options.rowCallback"],"jsHooks":[]}</script>
+</div>
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-e47cf6676a790544eefe" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-e47cf6676a790544eefe">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.0312\" data-max=\"0.25\" data-scale=\"4\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"120000\" data-max=\"960000\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.899\" data-max=\"0.946\" data-scale=\"3\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","caption":"<caption>Coverage across the first-stage sampling fraction (Web Table S25).<\/caption>","data":[["Design B (2 PSUs/stratum, NHANES-like)","Design B (2 PSUs/stratum, NHANES-like)","Design B (2 PSUs/stratum, NHANES-like)","Design B (2 PSUs/stratum, NHANES-like)"],["L1: GLM","L1: GLM","L1: GLM","L1: GLM"],["no","no","no","no"],[0.0312,0.0625,0.125,0.25],[960000,480000,240000,120000],[0.899,0.921,0.946,0.909]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Scenario<\/th>\n      <th>Rung<\/th>\n      <th>FPC<\/th>\n      <th>Fraction<\/th>\n      <th>Pop. size<\/th>\n      <th>Coverage<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":6,"scrollX":true,"order":[],"autoWidth":false,"columnDefs":[{"targets":3,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"targets":5,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"className":"dt-right","targets":[3,4,5]},{"name":"Scenario","targets":0},{"name":"Rung","targets":1},{"name":"FPC","targets":2},{"name":"Fraction","targets":3},{"name":"Pop. size","targets":4},{"name":"Coverage","targets":5}],"orderClasses":false,"orderCellsTop":true,"lengthMenu":[6,10,25,50,100],"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[5]; $(this.api().cell(row, 5).node()).css({'background-color':isNaN(parseFloat(value)) ? '' : value <= 0.9 ? \"#F6D9C9\" : value <= 0.935 ? \"#FFF3CD\" : \"#D6F0DB\"});\n}"}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render","options.rowCallback"],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="high-design-effect-stress-design-c" class="level2">
+<h2 class="anchored" data-anchor-id="high-design-effect-stress-design-c">High design-effect stress (Design C)</h2>
+<p>A stress design that roughly doubles the influence-function clustering design effect (DEFF). The recommended estimator stays at or above nominal while the design-naive arms degrade more sharply. <em>(Web Table S26)</em></p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Figure</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">Table</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<div class="cell">
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-e7af9005e299febaa070" style="width:100%;height:288px;"></div>
+<script type="application/json" data-for="htmlwidget-e7af9005e299febaa070">{"x":{"data":[{"x":[1,2,3],"y":[0.36199999999999999,0.34999999999999998,0.182],"text":["Non-Aware<br />coverage = 0.362","Non-Aware<br />coverage = 0.350","Non-Aware<br />coverage = 0.182"],"type":"scatter","mode":"lines+markers","line":{"width":2.2677165354330708,"color":"rgba(153,153,153,1)","dash":"solid"},"hoveron":"points","name":"Non-Aware","legendgroup":"Non-Aware","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(153,153,153,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(153,153,153,1)"}},"frame":null},{"x":[1,2,3],"y":[0.76500000000000001,0.70999999999999996,0.126],"text":["Partially-Aware<br />coverage = 0.765","Partially-Aware<br />coverage = 0.710","Partially-Aware<br />coverage = 0.126"],"type":"scatter","mode":"lines+markers","line":{"width":2.2677165354330708,"color":"rgba(230,159,0,1)","dash":"solid"},"hoveron":"points","name":"Partially-Aware","legendgroup":"Partially-Aware","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(230,159,0,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(230,159,0,1)"}},"frame":null},{"x":[1,2,3],"y":[0.92900000000000005,0.91000000000000003,0.28100000000000003],"text":["Fully-Aware<br />coverage = 0.929","Fully-Aware<br />coverage = 0.910","Fully-Aware<br />coverage = 0.281"],"type":"scatter","mode":"lines+markers","line":{"width":2.2677165354330708,"color":"rgba(213,94,0,1)","dash":"solid"},"hoveron":"points","name":"Fully-Aware","legendgroup":"Fully-Aware","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(213,94,0,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(213,94,0,1)"}},"frame":null},{"x":[2],"y":[0.89000000000000001],"text":"Fully-Aware-CV<br />coverage = 0.890","type":"scatter","mode":"lines+markers","line":{"width":2.2677165354330708,"color":"rgba(0,158,115,1)","dash":"solid"},"hoveron":"points","name":"Fully-Aware-CV","legendgroup":"Fully-Aware-CV","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(0,158,115,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,158,115,1)"}},"frame":null},{"x":[1,2,3],"y":[0.93300000000000005,0.94799999999999995,0.97999999999999998],"text":["Fully-Aware-CF<br />coverage = 0.933","Fully-Aware-CF<br />coverage = 0.948","Fully-Aware-CF<br />coverage = 0.980"],"type":"scatter","mode":"lines+markers","line":{"width":2.2677165354330708,"color":"rgba(0,114,178,1)","dash":"solid"},"hoveron":"points","name":"Fully-Aware-CF","legendgroup":"Fully-Aware-CF","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(0,114,178,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,114,178,1)"}},"frame":null},{"x":[0.40000000000000002,3.6000000000000001],"y":[0.94999999999999996,0.94999999999999996],"text":"","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(140,140,140,1)","dash":"dash"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":23.970112079701121,"r":7.9701120797011216,"b":80,"l":53.399750933997524},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,3.6000000000000001],"tickmode":"array","ticktext":["L1","L3","L4"],"tickvals":[1,2,3],"categoryorder":"array","categoryarray":["L1","L3","L4"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.72455564360919278,"zeroline":false,"anchor":"y","title":{"text":"","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.050000000000000003,1.05],"tickmode":"array","ticktext":["0.00","0.25","0.50","0.75","1.00"],"tickvals":[0,0.25,0.5,0.75,1],"categoryorder":"array","categoryarray":["0.00","0.25","0.50","0.75","1.00"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.72455564360919289,"zeroline":false,"anchor":"x","title":{"text":"95% CI coverage","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243}},"hoverformat":".2f"},"shapes":[],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":12.7521793275218},"orientation":"h","x":0.5,"y":-0.20000000000000001,"xanchor":"center","yanchor":"top","title":{"text":"Arm","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"5b441a57269b":{"x":{},"y":{},"colour":{},"text":{},"type":"scatter"},"5b4435086f85":{"x":{},"y":{},"colour":{},"text":{}},"5b4450727775":{"yintercept":{}}},"cur_data":"5b441a57269b","visdat":{"5b441a57269b":["function (y) ","x"],"5b4435086f85":["function (y) ","x"],"5b4450727775":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<div class="cell">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-b12fa075a1e2bf034a81" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-b12fa075a1e2bf034a81">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.104521082448932\" data-max=\"1.31122029666255\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.126\" data-max=\"0.98\" data-scale=\"3\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"2.64055\" data-max=\"3.39908\" data-scale=\"5\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","caption":"<caption>High design-effect stress design (Web Table S26).<\/caption>","data":[["Design C (high design effect)","Design C (high design effect)","Design C (high design effect)","Design C (high design effect)","Design C (high design effect)","Design C (high design effect)","Design C (high design effect)","Design C (high design effect)","Design C (high design effect)","Design C (high design effect)","Design C (high design effect)","Design C (high design effect)","Design C (high design effect)"],["L1: GLM","L1: GLM","L1: GLM","L1: GLM","L3: + random forest","L3: + random forest","L3: + random forest","L3: + random forest","L3: + random forest","L4: deep RF (interpolating)","L4: deep RF (interpolating)","L4: deep RF (interpolating)","L4: deep RF (interpolating)"],["Non-Aware","Partially-Aware","Fully-Aware","Fully-Aware-CF","Non-Aware","Partially-Aware","Fully-Aware","Fully-Aware-CV","Fully-Aware-CF","Non-Aware","Partially-Aware","Fully-Aware","Fully-Aware-CF"],[0.25348927626684,0.635756163383531,1.02035911795053,1.03728688125869,0.237683555491752,0.547511995629937,0.90277084749523,0.847641302751314,1.04105891951265,0.151459171842654,0.104521082448932,0.189705132715656,1.31122029666255],[0.362,0.765,0.929,0.9330000000000001,0.35,0.71,0.91,0.89,0.948,0.182,0.126,0.281,0.98],[2.64055,2.64055,2.64055,2.64055,2.81289,2.81289,2.81289,2.81289,2.81289,3.39908,3.39908,3.39908,3.39908]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Scenario<\/th>\n      <th>Rung<\/th>\n      <th>Arm<\/th>\n      <th>SE/SD<\/th>\n      <th>Coverage<\/th>\n      <th>DEFF<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":13,"scrollX":true,"order":[],"autoWidth":false,"columnDefs":[{"targets":3,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"targets":4,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"targets":5,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"className":"dt-right","targets":[3,4,5]},{"name":"Scenario","targets":0},{"name":"Rung","targets":1},{"name":"Arm","targets":2},{"name":"SE/SD","targets":3},{"name":"Coverage","targets":4},{"name":"DEFF","targets":5}],"orderClasses":false,"orderCellsTop":true,"lengthMenu":[10,13,25,50,100],"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'background-color':isNaN(parseFloat(value)) ? '' : value <= 0.9 ? \"#F6D9C9\" : value <= 0.935 ? \"#FFF3CD\" : \"#D6F0DB\"});\n}"}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render","options.columnDefs.2.render","options.rowCallback"],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="jackknife-versus-linearization-variance" class="level2">
+<h2 class="anchored" data-anchor-id="jackknife-versus-linearization-variance">Jackknife versus linearization variance</h2>
+<p>The inexpensive Taylor-linearization standard error is not optimistic relative to a delete-one-PSU jackknife: the two SE/SD ratios and the two coverages agree (shown as a table, since it is a direct method-to-method comparison). <em>(Web Table S27)</em></p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-de29e608a91bd4742f42" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-de29e608a91bd4742f42">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.8745\" data-max=\"1.0502\" data-scale=\"4\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.8745\" data-max=\"1.0523\" data-scale=\"4\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.896\" data-max=\"0.942\" data-scale=\"3\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.896\" data-max=\"0.94\" data-scale=\"3\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"1\" data-max=\"1.0038\" data-scale=\"4\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","caption":"<caption>Jackknife versus linearization variance (Web Table S27). Each row carries both the Taylor and the delete-one-PSU jackknife SE/SD and coverage for the same fit.<\/caption>","data":[["Design B (2 PSUs/stratum, NHANES-like)","Design A (many PSUs/stratum)","Design B (2 PSUs/stratum, NHANES-like)","Design A (many PSUs/stratum)","Design B (2 PSUs/stratum, NHANES-like)","Design A (many PSUs/stratum)","Design B (2 PSUs/stratum, NHANES-like)","Design A (many PSUs/stratum)"],["L1: GLM","L1: GLM","L1: GLM","L1: GLM","L3: + random forest","L3: + random forest","L3: + random forest","L3: + random forest"],["Fully-Aware","Fully-Aware","Fully-Aware-CF","Fully-Aware-CF","Fully-Aware","Fully-Aware","Fully-Aware-CF","Fully-Aware-CF"],[1.0162,1.0158,1.0099,1.0253,0.8745000000000001,0.8777,1.0059,1.0502],[1.0162,1.0158,1.0082,1.027,0.8745000000000001,0.8777,1.0072,1.0523],[0.93,0.9340000000000001,0.922,0.9340000000000001,0.898,0.896,0.93,0.9419999999999999],[0.93,0.9340000000000001,0.914,0.9379999999999999,0.898,0.896,0.9399999999999999,0.9399999999999999],[1,1,1.0005,1.0031,1,1,1.0038,1.0033]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Scenario<\/th>\n      <th>Rung<\/th>\n      <th>Arm<\/th>\n      <th>SE/SD (Taylor)<\/th>\n      <th>SE/SD (jackknife)<\/th>\n      <th>Coverage (Taylor)<\/th>\n      <th>Coverage (jackknife)<\/th>\n      <th>Jack/lin SE ratio<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":12,"scrollX":true,"order":[],"autoWidth":false,"columnDefs":[{"targets":3,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"targets":4,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"targets":5,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"targets":6,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"targets":7,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"className":"dt-right","targets":[3,4,5,6,7]},{"name":"Scenario","targets":0},{"name":"Rung","targets":1},{"name":"Arm","targets":2},{"name":"SE/SD (Taylor)","targets":3},{"name":"SE/SD (jackknife)","targets":4},{"name":"Coverage (Taylor)","targets":5},{"name":"Coverage (jackknife)","targets":6},{"name":"Jack/lin SE ratio","targets":7}],"orderClasses":false,"orderCellsTop":true,"lengthMenu":[10,12,25,50,100],"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[5]; $(this.api().cell(row, 5).node()).css({'background-color':isNaN(parseFloat(value)) ? '' : value <= 0.9 ? \"#F6D9C9\" : value <= 0.935 ? \"#FFF3CD\" : \"#D6F0DB\"});\n}"}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render","options.columnDefs.2.render","options.columnDefs.3.render","options.columnDefs.4.render","options.rowCallback"],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+<section id="variance-method-benchmark-web-appendix-g" class="level2">
+<h2 class="anchored" data-anchor-id="variance-method-benchmark-web-appendix-g">Variance-method benchmark (Web Appendix G)</h2>
+<p>On the smallest NHANES domain (E3), six routes to the standard error of the <strong>same</strong> fitted cross-fitted estimator agree to within 3%, while the only route that re-fits the machine-learning nuisances (the full cluster bootstrap) costs about 15 million times more core-seconds — so the design-based linearization standard error is both valid and essentially free. The compute landscape shows that the primary cross-fitted estimator is computationally practical, not <em>V</em> times more costly than a single fit. <em>(Web Tables S35–S36.)</em></p>
+<section id="six-variance-routes-web-table-s35" class="level3">
+<h3 class="anchored" data-anchor-id="six-variance-routes-web-table-s35">Six variance routes (Web Table S35)</h3>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">Figure</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false">Table</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
+<div class="cell">
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-d5002fafc38600fa8433" style="width:100%;height:231px;"></div>
+<script type="application/json" data-for="htmlwidget-d5002fafc38600fa8433">{"x":{"data":[{"x":[0.019900000000000001,0.019900000000000001],"y":[0.40000000000000002,6.5999999999999996],"text":"","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(140,140,140,1)","dash":"dash"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.019900000000000001,0.019900000000000001,null,0.019900000000000001,0.019900000000000001,null,0.019900000000000001,0.02,null,0.019900000000000001,0.02,null,0.019900000000000001,0.019599999999999999,null,0.019900000000000001,0.019300000000000001],"y":[6,6,null,5,5,null,4,4,null,3,3,null,2,2,null,1,1],"text":["Linearization (TSL)<br />SE = 0.0199 (SE/lin 1.00)<br />wall 0.02 s","Linearization (TSL)<br />SE = 0.0199 (SE/lin 1.00)<br />wall 0.02 s",null,"Delete-one-PSU jackknife (JKn)<br />SE = 0.0199 (SE/lin 1.00)<br />wall 0.31 s","Delete-one-PSU jackknife (JKn)<br />SE = 0.0199 (SE/lin 1.00)<br />wall 0.31 s",null,"Balanced repeated replication (BRR)<br />SE = 0.0200 (SE/lin 1.00)<br />wall 0.02 s","Balanced repeated replication (BRR)<br />SE = 0.0200 (SE/lin 1.00)<br />wall 0.02 s",null,"Fay's BRR (rho=0.3)<br />SE = 0.0200 (SE/lin 1.00)<br />wall 0.02 s","Fay's BRR (rho=0.3)<br />SE = 0.0200 (SE/lin 1.00)<br />wall 0.02 s",null,"Rao-Wu bootstrap weights (R=500)<br />SE = 0.0196 (SE/lin 0.99)<br />wall 8.6 s","Rao-Wu bootstrap weights (R=500)<br />SE = 0.0196 (SE/lin 0.99)<br />wall 8.6 s",null,"Cluster bootstrap (B=500)<br />SE = 0.0193 (SE/lin 0.97)<br />wall 8877 s","Cluster bootstrap (B=500)<br />SE = 0.0193 (SE/lin 0.97)<br />wall 8877 s"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(0,114,178,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.019900000000000001,0.019900000000000001,0.02,0.02,0.019599999999999999,0.019300000000000001],"y":[6,5,4,3,2,1],"text":["Linearization (TSL)<br />SE = 0.0199 (SE/lin 1.00)<br />wall 0.02 s","Delete-one-PSU jackknife (JKn)<br />SE = 0.0199 (SE/lin 1.00)<br />wall 0.31 s","Balanced repeated replication (BRR)<br />SE = 0.0200 (SE/lin 1.00)<br />wall 0.02 s","Fay's BRR (rho=0.3)<br />SE = 0.0200 (SE/lin 1.00)<br />wall 0.02 s","Rao-Wu bootstrap weights (R=500)<br />SE = 0.0196 (SE/lin 0.99)<br />wall 8.6 s","Cluster bootstrap (B=500)<br />SE = 0.0193 (SE/lin 0.97)<br />wall 8877 s"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,114,178,1)","opacity":1,"size":9.8267716535433092,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,114,178,1)"}},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":23.970112079701121,"r":7.9701120797011216,"b":40.647571606475722,"l":235.11830635118318},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.019265000000000001,0.020035000000000001],"tickmode":"array","ticktext":["0.0194","0.0196","0.0198","0.0200"],"tickvals":[0.019400000000000001,0.019600000000000003,0.019800000000000002,0.02],"categoryorder":"array","categoryarray":["0.0194","0.0196","0.0198","0.0200"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.72455564360919289,"zeroline":false,"anchor":"y","title":{"text":"Standard error of the same Fully-Aware-CF fit (E3)","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,6.5999999999999996],"tickmode":"array","ticktext":["Cluster bootstrap (B=500)","Rao-Wu bootstrap weights (R=500)","Fay's BRR (rho=0.3)","Balanced repeated replication (BRR)","Delete-one-PSU jackknife (JKn)","Linearization (TSL)"],"tickvals":[1,2,3,3.9999999999999996,5,6],"categoryorder":"array","categoryarray":["Cluster bootstrap (B=500)","Rao-Wu bootstrap weights (R=500)","Fay's BRR (rho=0.3)","Balanced repeated replication (BRR)","Delete-one-PSU jackknife (JKn)","Linearization (TSL)"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.72455564360919289,"zeroline":false,"anchor":"x","title":{"text":"","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243}},"hoverformat":".2f"},"shapes":[],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":12.7521793275218}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"5b44349d74cf":{"xintercept":{},"type":"scatter"},"5b442ff61836":{"x":{},"y":{},"text":{},"xend":{},"yend":{}},"5b442b891c9":{"x":{},"y":{},"text":{}}},"cur_data":"5b44349d74cf","visdat":{"5b44349d74cf":["function (y) ","x"],"5b442ff61836":["function (y) ","x"],"5b442b891c9":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+<div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
+<div class="cell">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-451e9c7faa048dfd1d66" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-451e9c7faa048dfd1d66">{"x":{"filter":"none","vertical":false,"caption":"<caption>Six variance routes for the primary Fully-Aware-CF estimator on E3 (point estimate 0.038, single imputation; df = 30, design effect 2.57). Web Table S35.<\/caption>","data":[["Linearization (TSL)","Delete-one-PSU jackknife (JKn)","Balanced repeated replication (BRR)","Fay's BRR (rho=0.3)","Rao-Wu bootstrap weights (R=500)","Cluster bootstrap (B=500)"],["No","No","No","No","No","Yes"],["No","No","No","No","No","Yes"],[0.0199,0.0199,0.02,0.02,0.0196,0.0193],[1,1,1,1,0.99,0.97],["(-0.003, 0.078)","(-0.003, 0.078)","(-0.003, 0.079)","(-0.003, 0.079)","(-0.002, 0.078)","(-0.002, 0.071) [percentile]"],[0.02,0.31,0.02,0.02,8.6,8877],["1x","~19x","~1x","~1x","~540x","~1.5e7x"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Variance method<\/th>\n      <th>Refit?<\/th>\n      <th>Nuisance unc.?<\/th>\n      <th>SE<\/th>\n      <th>SE/lin.<\/th>\n      <th>95% CI<\/th>\n      <th>Wall (s)<\/th>\n      <th>Core-sec/lin.<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":6,"dom":"t","scrollX":true,"columnDefs":[{"targets":4,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 2, 3, \",\", \".\", null);\n  }"},{"targets":3,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 4, 3, \",\", \".\", null);\n  }"},{"className":"dt-right","targets":[3,4,6]},{"name":"Variance method","targets":0},{"name":"Refit?","targets":1},{"name":"Nuisance unc.?","targets":2},{"name":"SE","targets":3},{"name":"SE/lin.","targets":4},{"name":"95% CI","targets":5},{"name":"Wall (s)","targets":6},{"name":"Core-sec/lin.","targets":7}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[6,10,25,50,100]}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render"],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="compute-landscape-web-table-s36" class="level3">
+<h3 class="anchored" data-anchor-id="compute-landscape-web-table-s36">Compute landscape (Web Table S36)</h3>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true">Figure</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false">Table</a></li></ul>
+<div class="tab-content">
+<div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
+<div class="cell">
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-137983254f971c25d14f" style="width:100%;height:260px;"></div>
+<script type="application/json" data-for="htmlwidget-137983254f971c25d14f">{"x":{"data":[{"x":[-1,2.287129620719111,null,-1,2.0496056125949731,null,-1,2.0496056125949731,null,-1,1.4913616938342726,null,-1,1.5301996982030821,null,-1,1.4871383754771865,null,-1,1.5403294747908738,null,-1,-0.88605664769316317,null,-1,1.9138138523837167,null,-1,2.1078880251827985],"y":[10,10,null,9,9,null,8,8,null,7,7,null,6,6,null,5,5,null,4,4,null,3,3,null,2,2,null,1,1],"text":["Non-Aware (unweighted single-fit)<br />total 193.7 s (V=1, refits=1)","Non-Aware (unweighted single-fit)<br />total 193.7 s (V=1, refits=1)",null,"Partially-Aware (weighted point)<br />total 112.1 s (V=1, refits=1)","Partially-Aware (weighted point)<br />total 112.1 s (V=1, refits=1)",null,"Fully-Aware (weighted single-fit)<br />total 112.1 s (V=1, refits=1)","Fully-Aware (weighted single-fit)<br />total 112.1 s (V=1, refits=1)",null,"Fully-Aware-CV (internal cross-validation)<br />total 31.0 s (V=5, refits=5)","Fully-Aware-CV (internal cross-validation)<br />total 31.0 s (V=5, refits=5)",null,"Fully-Aware-CF (primary, cross-fit)<br />total 33.9 s (V=5, refits=5)","Fully-Aware-CF (primary, cross-fit)<br />total 33.9 s (V=5, refits=5)",null,"AIPW, single-fit<br />total 30.7 s (V=1, refits=1)","AIPW, single-fit<br />total 30.7 s (V=1, refits=1)",null,"AIPW, cross-fit<br />total 34.7 s (V=5, refits=5)","AIPW, cross-fit<br />total 34.7 s (V=5, refits=5)",null,"Risk ratio / odds ratio<br />total 0.1 s (V=5, refits=0)","Risk ratio / odds ratio<br />total 0.1 s (V=5, refits=0)",null,"Continuous outcome (Gaussian)<br />total 82.0 s (V=5, refits=5)","Continuous outcome (Gaussian)<br />total 82.0 s (V=5, refits=5)",null,"Deployable Super Learner (cross-fit)<br />total 128.2 s (V=5, refits=5)","Deployable Super Learner (cross-fit)<br />total 128.2 s (V=5, refits=5)"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(17,119,51,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[2.287129620719111,2.0496056125949731,2.0496056125949731,1.4913616938342726,1.5301996982030821,1.4871383754771865,1.5403294747908738,-0.88605664769316317,1.9138138523837167,2.1078880251827985],"y":[10,9,8,7,6,5,4,3,2,1],"text":["Non-Aware (unweighted single-fit)<br />total 193.7 s (V=1, refits=1)","Partially-Aware (weighted point)<br />total 112.1 s (V=1, refits=1)","Fully-Aware (weighted single-fit)<br />total 112.1 s (V=1, refits=1)","Fully-Aware-CV (internal cross-validation)<br />total 31.0 s (V=5, refits=5)","Fully-Aware-CF (primary, cross-fit)<br />total 33.9 s (V=5, refits=5)","AIPW, single-fit<br />total 30.7 s (V=1, refits=1)","AIPW, cross-fit<br />total 34.7 s (V=5, refits=5)","Risk ratio / odds ratio<br />total 0.1 s (V=5, refits=0)","Continuous outcome (Gaussian)<br />total 82.0 s (V=5, refits=5)","Deployable Super Learner (cross-fit)<br />total 128.2 s (V=5, refits=5)"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(17,119,51,1)","opacity":1,"size":9.8267716535433092,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(17,119,51,1)"}},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":23.970112079701121,"r":7.9701120797011216,"b":40.647571606475722,"l":279.75093399750949},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-1.1643564810359557,2.4514861017550666],"tickmode":"array","ticktext":["0.1","1.0","10.0","100.0"],"tickvals":[-1,0,1,2],"categoryorder":"array","categoryarray":["0.1","1.0","10.0","100.0"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505603,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.72455564360919289,"zeroline":false,"anchor":"y","title":{"text":"Total compute time (s, log scale)","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["Deployable Super Learner (cross-fit)","Continuous outcome (Gaussian)","Risk ratio / odds ratio","AIPW, cross-fit","AIPW, single-fit","Fully-Aware-CF (primary, cross-fit)","Fully-Aware-CV (internal cross-validation)","Fully-Aware (weighted single-fit)","Partially-Aware (weighted point)","Non-Aware (unweighted single-fit)"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["Deployable Super Learner (cross-fit)","Continuous outcome (Gaussian)","Risk ratio / odds ratio","AIPW, cross-fit","AIPW, single-fit","Fully-Aware-CF (primary, cross-fit)","Fully-Aware-CV (internal cross-validation)","Fully-Aware (weighted single-fit)","Partially-Aware (weighted point)","Non-Aware (unweighted single-fit)"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.72455564360919289,"zeroline":false,"anchor":"x","title":{"text":"","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241}},"hoverformat":".2f"},"shapes":[],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":12.7521793275218}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"5b447be76382":{"x":{},"y":{},"text":{},"xend":{},"yend":{},"type":"scatter"},"5b44706a2279":{"x":{},"y":{},"text":{}}},"cur_data":"5b447be76382","visdat":{"5b447be76382":["function (y) ","x"],"5b44706a2279":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+<div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
+<div class="cell">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-e36e9eb4565e96d3f34e" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-e36e9eb4565e96d3f34e">{"x":{"filter":"none","vertical":false,"caption":"<caption>Compute landscape across estimators and estimands on E3 (single imputation, single-core); the design-based SE is a frozen-influence-function plug-in costing about 0.1 s. Web Table S36.<\/caption>","data":[["Non-Aware (unweighted single-fit)","Partially-Aware (weighted point)","Fully-Aware (weighted single-fit)","Fully-Aware-CV (internal cross-validation)","Fully-Aware-CF (primary, cross-fit)","AIPW, single-fit","AIPW, cross-fit","Risk ratio / odds ratio","Continuous outcome (Gaussian)","Deployable Super Learner (cross-fit)"],[1,1,1,5,5,1,5,5,5,5],[1,1,1,5,5,1,5,0,5,5],[193.7,112,112,30.9,33.8,30.6,34.6,0.13,81.8,128.1],[193.7,112,112,30.9,33.8,30.6,34.6,0.13,81.8,128.1],[1,1,1,1,1,1,1,1,1,1],[0,0.11,0.11,0.11,0.11,0.11,0.11,null,0.11,0.11],[193.7,112.1,112.1,31,33.9,30.7,34.7,0.13,82,128.2]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Estimator / estimand<\/th>\n      <th>V<\/th>\n      <th>Refits<\/th>\n      <th>Point: wall (s)<\/th>\n      <th>Point: CPU (s)<\/th>\n      <th>Cores<\/th>\n      <th>Design SE (s)<\/th>\n      <th>Total (s)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"dom":"t","scrollX":true,"columnDefs":[{"targets":6,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 2, 3, \",\", \".\", null);\n  }"},{"targets":3,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 1, 3, \",\", \".\", null);\n  }"},{"targets":4,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 1, 3, \",\", \".\", null);\n  }"},{"targets":7,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 1, 3, \",\", \".\", null);\n  }"},{"className":"dt-right","targets":[1,2,3,4,5,6,7]},{"name":"Estimator / estimand","targets":0},{"name":"V","targets":1},{"name":"Refits","targets":2},{"name":"Point: wall (s)","targets":3},{"name":"Point: CPU (s)","targets":4},{"name":"Cores","targets":5},{"name":"Design SE (s)","targets":6},{"name":"Total (s)","targets":7}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render","options.columnDefs.2.render","options.columnDefs.3.render"],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Robustness &amp; sensitivity"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="in">```{r setup}</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">echo =</span> <span class="cn">FALSE</span>, <span class="at">message =</span> <span class="cn">FALSE</span>, <span class="at">warning =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2); <span class="fu">library</span>(plotly); <span class="fu">library</span>(DT)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"R/load_data.R"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>Method-robustness checks on **synthetic data with known truth** — each stresses</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>the recommended estimator on a design feature the headline simulation holds fixed.</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>Use the **Figure / Table** toggle in each to switch between the picture and the</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>numbers.</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>**Coverage shading.** Cells are **green** at/above 0.935 (near nominal),</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>**amber** 0.90–0.935 (slightly low), and **red** below 0.90 (collapsed); the</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>nominal target is 0.95.</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## Robustness to informative selection</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>When selection is informative **beyond** the measured confounders, the</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>de-weighted out-of-fold fits still hold: coverage stays near nominal across the</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>sweep of the informativeness parameter $\rho$. *(Web Table S33)*</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>::: {.panel-tabset}</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Figure</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="in">```{r informative_fig}</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-alt: "Coverage against the informativeness parameter rho, faceted by rung, for the weighted and unweighted out-of-fold cross-fitted fits; coverage stays near the nominal 0.95 across the sweep."</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="fu">coverage_fig</span>(<span class="st">"R07_informative_summary.csv"</span>, <span class="at">xvar =</span> <span class="st">"rho"</span>, <span class="at">facet =</span> <span class="st">"rung"</span>,</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>             <span class="at">facet_labels =</span> rung_labels, <span class="at">xlab =</span> <span class="st">"informativeness ρ"</span>)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Table</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="in">```{r informative}</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="fu">dt_show</span>(<span class="st">"R07_informative_summary.csv"</span>,</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        <span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"rho"</span><span class="ot">=</span><span class="st">"rho"</span>,<span class="st">"Rung"</span><span class="ot">=</span><span class="st">"rung"</span>,<span class="st">"Arm"</span><span class="ot">=</span><span class="st">"method"</span>,<span class="st">"Bias"</span><span class="ot">=</span><span class="st">"bias"</span>,</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"SE/SD"</span><span class="ot">=</span><span class="st">"se_ratio"</span>,<span class="st">"Coverage"</span><span class="ot">=</span><span class="st">"coverage"</span>),</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>        <span class="at">cover =</span> <span class="st">"Coverage"</span>, <span class="at">page =</span> <span class="dv">12</span>, <span class="at">sort =</span> <span class="fu">c</span>(<span class="st">"Rung"</span>),</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="st">"Robustness to informative selection beyond the confounders (Web Table S33)."</span>)</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="fu">## Finite-population correction</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>Omitting the finite-population correction (FPC) does **not** over-cover when the</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>sampling fraction is non-negligible — coverage is calibrated and flat in the</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>fraction, confirming the no-correction variance is the safe, conservative choice.</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>*(Web Table S25)*</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>::: {.panel-tabset}</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Figure</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fpc_fig}</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-alt: "Coverage by rung for the Fully-Aware and Fully-Aware-CF arms with and without the finite-population correction; coverage is near nominal either way."</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="fu">coverage_fig</span>(<span class="st">"R10_fpc_partA_summary.csv"</span>, <span class="at">facet =</span> <span class="st">"fpc"</span>,</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>             <span class="at">facet_labels =</span> <span class="fu">c</span>(<span class="at">no =</span> <span class="st">"no FPC"</span>, <span class="at">yes =</span> <span class="st">"with FPC"</span>))</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Table</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fpc}</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="fu">dt_show</span>(<span class="st">"R10_fpc_partA_summary.csv"</span>,</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>        <span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"Scenario"</span><span class="ot">=</span><span class="st">"scenario"</span>,<span class="st">"Rung"</span><span class="ot">=</span><span class="st">"rung"</span>,<span class="st">"Arm"</span><span class="ot">=</span><span class="st">"method"</span>,<span class="st">"FPC"</span><span class="ot">=</span><span class="st">"fpc"</span>,</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"SE/SD"</span><span class="ot">=</span><span class="st">"se_ratio"</span>,<span class="st">"Coverage"</span><span class="ot">=</span><span class="st">"coverage"</span>),</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>        <span class="at">cover =</span> <span class="st">"Coverage"</span>, <span class="at">page =</span> <span class="dv">8</span>, <span class="at">sort =</span> <span class="fu">c</span>(<span class="st">"Rung"</span>,<span class="st">"Arm"</span>),</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="st">"Finite-population-correction robustness (Web Table S25)."</span>)</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="fu">dt_show</span>(<span class="st">"R10_fpc_fraction_sweep.csv"</span>,</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>        <span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"Scenario"</span><span class="ot">=</span><span class="st">"scenario"</span>,<span class="st">"Rung"</span><span class="ot">=</span><span class="st">"rung"</span>,<span class="st">"FPC"</span><span class="ot">=</span><span class="st">"fpc"</span>,<span class="st">"Fraction"</span><span class="ot">=</span><span class="st">"frac"</span>,</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"Pop. size"</span><span class="ot">=</span><span class="st">"N_pop"</span>,<span class="st">"Coverage"</span><span class="ot">=</span><span class="st">"coverage"</span>),</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>        <span class="at">cover =</span> <span class="st">"Coverage"</span>, <span class="at">page =</span> <span class="dv">6</span>,</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="st">"Coverage across the first-stage sampling fraction (Web Table S25)."</span>)</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a><span class="fu">## High design-effect stress (Design C)</span></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>A stress design that roughly doubles the influence-function clustering design</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>effect (DEFF). The recommended estimator stays at or above nominal while the</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>design-naive arms degrade more sharply. *(Web Table S26)*</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>::: {.panel-tabset}</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Figure</span></span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a><span class="in">```{r highdeff_fig}</span></span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-alt: "Coverage by rung for the five arms under the high-design-effect Design C; the cross-fitted Fully-Aware-CF stays at or above nominal while the design-naive arms drop."</span></span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a><span class="fu">coverage_fig</span>(<span class="st">"R12_highdeff_pooled.csv"</span>)</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Table</span></span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a><span class="in">```{r highdeff}</span></span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a><span class="fu">dt_show</span>(<span class="st">"R12_highdeff_pooled.csv"</span>,</span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>        <span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"Scenario"</span><span class="ot">=</span><span class="st">"scenario"</span>,<span class="st">"Rung"</span><span class="ot">=</span><span class="st">"rung"</span>,<span class="st">"Arm"</span><span class="ot">=</span><span class="st">"method"</span>,<span class="st">"SE/SD"</span><span class="ot">=</span><span class="st">"se_ratio"</span>,</span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"Coverage"</span><span class="ot">=</span><span class="st">"coverage"</span>,<span class="st">"DEFF"</span><span class="ot">=</span><span class="st">"deff_clust"</span>),</span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a>        <span class="at">cover =</span> <span class="st">"Coverage"</span>, <span class="at">page =</span> <span class="dv">13</span>, <span class="at">sort =</span> <span class="fu">c</span>(<span class="st">"Rung"</span>,<span class="st">"Arm"</span>),</span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="st">"High design-effect stress design (Web Table S26)."</span>)</span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a><span class="fu">## Jackknife versus linearization variance</span></span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a>The inexpensive Taylor-linearization standard error is not optimistic relative to</span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a>a delete-one-PSU jackknife: the two SE/SD ratios and the two coverages agree</span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a>(shown as a table, since it is a direct method-to-method comparison).</span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a>*(Web Table S27)*</span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a><span class="in">```{r jackknife}</span></span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a><span class="fu">dt_show</span>(<span class="st">"R11_resampling_eff_summary.csv"</span>,</span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a>        <span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"Scenario"</span><span class="ot">=</span><span class="st">"scenario"</span>,<span class="st">"Rung"</span><span class="ot">=</span><span class="st">"rung"</span>,<span class="st">"Arm"</span><span class="ot">=</span><span class="st">"method"</span>,</span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"SE/SD (Taylor)"</span><span class="ot">=</span><span class="st">"se_ratio_taylor"</span>,<span class="st">"SE/SD (jackknife)"</span><span class="ot">=</span><span class="st">"se_ratio_jack"</span>,</span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"Coverage (Taylor)"</span><span class="ot">=</span><span class="st">"coverage_taylor"</span>,<span class="st">"Coverage (jackknife)"</span><span class="ot">=</span><span class="st">"coverage_jack"</span>,</span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"Jack/lin SE ratio"</span><span class="ot">=</span><span class="st">"jk_lin_ratio"</span>),</span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a>        <span class="at">cover =</span> <span class="st">"Coverage (Taylor)"</span>, <span class="at">page =</span> <span class="dv">12</span>, <span class="at">sort =</span> <span class="fu">c</span>(<span class="st">"Rung"</span>,<span class="st">"Arm"</span>),</span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a>        <span class="at">keep =</span> <span class="fu">list</span>(<span class="at">kind =</span> <span class="st">"jack"</span>),</span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="st">"Jackknife versus linearization variance (Web Table S27). Each row carries both the Taylor and the delete-one-PSU jackknife SE/SD and coverage for the same fit."</span>)</span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a><span class="fu">## Variance-method benchmark (Web Appendix G)</span></span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a>On the smallest NHANES domain (E3), six routes to the standard error of the</span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a>**same** fitted cross-fitted estimator agree to within 3%, while the only route</span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a>that re-fits the machine-learning nuisances (the full cluster bootstrap) costs</span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a>about 15 million times more core-seconds — so the design-based linearization</span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a>standard error is both valid and essentially free. The compute landscape shows</span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>that the primary cross-fitted estimator is computationally practical, not *V*</span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a>times more costly than a single fit. *(Web Tables S35–S36.)*</span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a><span class="fu">### Six variance routes (Web Table S35)</span></span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a>::: {.panel-tabset}</span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Figure</span></span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a><span class="in">```{r bench_variance_fig}</span></span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.2</span></span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>({ <span class="fu">library</span>(ggplot2); <span class="fu">library</span>(plotly) })</span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a>bv <span class="ot">&lt;-</span> <span class="fu">read_csv_app</span>(<span class="st">"bench_variance.csv"</span>); bv<span class="sc">$</span>method <span class="ot">&lt;-</span> <span class="fu">factor</span>(bv<span class="sc">$</span>method, <span class="at">levels =</span> <span class="fu">rev</span>(bv<span class="sc">$</span>method))</span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(bv, <span class="fu">aes</span>(se, method, <span class="at">text =</span> <span class="fu">sprintf</span>(<span class="st">"%s</span><span class="sc">\n</span><span class="st">SE = %.4f (SE/lin %.2f)</span><span class="sc">\n</span><span class="st">wall %s s"</span>, method, se, se_ratio, wall_s))) <span class="sc">+</span></span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fl">0.0199</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">colour =</span> <span class="st">"grey55"</span>) <span class="sc">+</span></span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">0.0199</span>, <span class="at">xend =</span> se, <span class="at">yend =</span> method), <span class="at">colour =</span> <span class="st">"#0072B2"</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">2.6</span>, <span class="at">colour =</span> <span class="st">"#0072B2"</span>) <span class="sc">+</span></span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Standard error of the same Fully-Aware-CF fit (E3)"</span>, <span class="at">y =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Dashed line: linearization SE. All six routes agree within 3%."</span>) <span class="sc">+</span></span>
+<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>)</span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplotly</span>(p, <span class="at">tooltip =</span> <span class="st">"text"</span>)</span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Table</span></span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a><span class="in">```{r bench_variance}</span></span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a>bv <span class="ot">&lt;-</span> <span class="fu">read_csv_app</span>(<span class="st">"bench_variance.csv"</span>)</span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(bv) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Variance method"</span>,<span class="st">"Refit?"</span>,<span class="st">"Nuisance unc.?"</span>,<span class="st">"SE"</span>,<span class="st">"SE/lin."</span>,<span class="st">"95% CI"</span>,<span class="st">"Wall (s)"</span>,<span class="st">"Core-sec/lin."</span>)</span>
+<span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(bv, <span class="at">rownames =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a>              <span class="at">caption =</span> <span class="st">"Six variance routes for the primary Fully-Aware-CF estimator on E3 (point estimate 0.038, single imputation; df = 30, design effect 2.57). Web Table S35."</span>,</span>
+<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a>              <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">6</span>, <span class="at">dom =</span> <span class="st">"t"</span>, <span class="at">scrollX =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a>  DT<span class="sc">::</span><span class="fu">formatRound</span>(<span class="st">"SE"</span>, <span class="dv">4</span>) <span class="sc">|&gt;</span> DT<span class="sc">::</span><span class="fu">formatRound</span>(<span class="st">"SE/lin."</span>, <span class="dv">2</span>)</span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a><span class="fu">### Compute landscape (Web Table S36)</span></span>
+<span id="cb1-157"><a href="#cb1-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a>::: {.panel-tabset}</span>
+<span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Figure</span></span>
+<span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a><span class="in">```{r bench_compute_fig}</span></span>
+<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.6</span></span>
+<span id="cb1-162"><a href="#cb1-162" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>({ <span class="fu">library</span>(ggplot2); <span class="fu">library</span>(plotly) })</span>
+<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a>bc <span class="ot">&lt;-</span> <span class="fu">read_csv_app</span>(<span class="st">"bench_compute.csv"</span>); bc<span class="sc">$</span>estimator <span class="ot">&lt;-</span> <span class="fu">factor</span>(bc<span class="sc">$</span>estimator, <span class="at">levels =</span> <span class="fu">rev</span>(bc<span class="sc">$</span>estimator))</span>
+<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(bc, <span class="fu">aes</span>(total_s, estimator, <span class="at">text =</span> <span class="fu">sprintf</span>(<span class="st">"%s</span><span class="sc">\n</span><span class="st">total %.1f s (V=%.0f, refits=%.0f)"</span>, estimator, total_s, <span class="fu">as.numeric</span>(V), <span class="fu">as.numeric</span>(refits)))) <span class="sc">+</span></span>
+<span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">0.1</span>, <span class="at">xend =</span> total_s, <span class="at">yend =</span> estimator), <span class="at">colour =</span> <span class="st">"#117733"</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">2.6</span>, <span class="at">colour =</span> <span class="st">"#117733"</span>) <span class="sc">+</span> <span class="fu">scale_x_log10</span>() <span class="sc">+</span></span>
+<span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Total compute time (s, log scale)"</span>, <span class="at">y =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"The primary cross-fitted estimator (~34 s) is cheaper than the single-fit arms (112–194 s)."</span>) <span class="sc">+</span></span>
+<span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>)</span>
+<span id="cb1-170"><a href="#cb1-170" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplotly</span>(p, <span class="at">tooltip =</span> <span class="st">"text"</span>)</span>
+<span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Table</span></span>
+<span id="cb1-173"><a href="#cb1-173" aria-hidden="true" tabindex="-1"></a><span class="in">```{r bench_compute}</span></span>
+<span id="cb1-174"><a href="#cb1-174" aria-hidden="true" tabindex="-1"></a>bc <span class="ot">&lt;-</span> <span class="fu">read_csv_app</span>(<span class="st">"bench_compute.csv"</span>)</span>
+<span id="cb1-175"><a href="#cb1-175" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(bc) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Estimator / estimand"</span>,<span class="st">"V"</span>,<span class="st">"Refits"</span>,<span class="st">"Point: wall (s)"</span>,<span class="st">"Point: CPU (s)"</span>,<span class="st">"Cores"</span>,<span class="st">"Design SE (s)"</span>,<span class="st">"Total (s)"</span>)</span>
+<span id="cb1-176"><a href="#cb1-176" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(bc, <span class="at">rownames =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-177"><a href="#cb1-177" aria-hidden="true" tabindex="-1"></a>              <span class="at">caption =</span> <span class="st">"Compute landscape across estimators and estimands on E3 (single imputation, single-core); the design-based SE is a frozen-influence-function plug-in costing about 0.1 s. Web Table S36."</span>,</span>
+<span id="cb1-178"><a href="#cb1-178" aria-hidden="true" tabindex="-1"></a>              <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">10</span>, <span class="at">dom =</span> <span class="st">"t"</span>, <span class="at">scrollX =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb1-179"><a href="#cb1-179" aria-hidden="true" tabindex="-1"></a>  DT<span class="sc">::</span><span class="fu">formatRound</span>(<span class="fu">c</span>(<span class="st">"Point: wall (s)"</span>,<span class="st">"Point: CPU (s)"</span>,<span class="st">"Total (s)"</span>), <span class="dv">1</span>) <span class="sc">|&gt;</span> DT<span class="sc">::</span><span class="fu">formatRound</span>(<span class="st">"Design SE (s)"</span>, <span class="dv">2</span>)</span>
+<span id="cb1-180"><a href="#cb1-180" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-181"><a href="#cb1-181" aria-hidden="true" tabindex="-1"></a>:::</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>Companion site to <em>Cross-Fitted Survey-Weighted TMLE with Design-Based Variance for Causal Machine Learning</em>. The manuscript and Web Appendix are the source of record.</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

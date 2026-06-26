@@ -1,0 +1,335 @@
+---
+title: "Simulation results"
+---
+
+```{r setup}
+#| include: false
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(ggplot2); library(plotly); library(DT)
+source("R/load_data.R")
+sim <- load_sim()
+```
+
+A two-stage stratified cluster sample with informative selection, analysed by
+five **arms** that differ only in how they use the design, swept across a
+**Super Learner complexity ladder** (L1 GLM to L4 deep interpolating random
+forest) under **Design A** (many PSUs per stratum) and **Design B** (two PSUs per
+stratum, NHANES-like). 1,000 replicates per cell. Each experiment offers a
+**Figure** view (the story at a glance) and a **Table** view (exact numbers,
+filterable).
+
+::: {.callout-note appearance="simple"}
+**Coverage shading.** Cells are **green** at/above 0.935 (near nominal),
+**amber** 0.90–0.935 (slightly low), and **red** below 0.90 (collapsed); the
+nominal target is 0.95.
+:::
+
+## Coverage across the ladder
+
+Single-fit **Fully-Aware** tracks nominal at the smooth rungs and collapses at
+the interpolating L4; the cross-fitted **Fully-Aware-CF** holds across the whole
+ladder.
+
+::: {.panel-tabset}
+#### Headline: coverage across the ladder
+```{r ladder}
+#| fig-height: 5.5
+#| fig-alt: "Line plot of empirical 95% confidence-interval coverage across the L1 to L4 Super Learner complexity ladder for four arms, faceted by Design A and Design B. Single-fit Fully-Aware and Partially-Aware track near 0.9 through L3 then drop to about 0.2 at L4, Non-Aware sits lowest throughout, while cross-fitted Fully-Aware-CF stays close to the nominal 0.95 across all rungs."
+main <- sim[sim$Arm %in% c("Fully-Aware","Fully-Aware-CF","Partially-Aware","Non-Aware"), ]
+main$Arm <- droplevels(main$Arm)
+p <- ggplot(main, aes(Rung, coverage, colour = Arm, group = Arm, linetype = Arm,
+                      text = sprintf("%s\n%s\ncoverage = %.3f (MCSE %.3f)", Arm, Rung, coverage, mcse_cov))) +
+  geom_hline(yintercept = 0.95, linetype = "dashed", colour = "grey55") +
+  geom_line(linewidth = 0.7) + geom_point(size = 2) + facet_wrap(~Design) +
+  scale_colour_manual(values = estimator_palette) + scale_y_continuous(limits = c(0, 1)) +
+  labs(x = NULL, y = "Empirical 95% CI coverage", colour = "Arm", linetype = "Arm") +
+  theme_minimal(base_size = 13) +
+  theme(axis.text.x = element_text(angle = 18, hjust = 1), legend.position = "bottom")
+ggplotly(p, tooltip = "text") |> layout(legend = list(orientation = "h", y = -0.2))
+```
+
+#### Full results: all five arms, both designs
+```{r fulltable}
+ft <- sim[, c("Design","Rung","Arm","bias","emp_sd","mean_se","se_ratio","coverage","deff_clust","icc_eif")]
+names(ft) <- c("Design","Rung","Arm","Bias","SD","SE","SE/SD","Coverage","DEFF","ICC")
+datatable(ft, filter = "top", rownames = FALSE,
+          caption = "Full simulation results across the ladder (Web Tables S3–S4).",
+          options = list(pageLength = 12, scrollX = TRUE, order = list())) |>
+  formatRound(c("Bias","SD","SE","SE/SD","Coverage","DEFF","ICC"), 3) |>
+  formatStyle("Coverage", backgroundColor = styleInterval(c(0.90,0.935), c("#F6D9C9","#FFF3CD","#D6F0DB")))
+```
+:::
+
+`SE/SD` near 1 is calibrated; `DEFF`/`ICC` are the influence-function clustering
+design effect and intracluster correlation.
+
+## Per-scenario diagnostics
+
+Single-fit (`_fa`) versus cross-fitted (`_cf`) propensity ranges and the
+targeting-fluctuation magnitude. At the interpolating rung L4 the single-fit
+propensity collapses to the full 0–1 range (positivity near-violation) while
+cross-fitting stays bounded at the 0.05 floor.
+
+::: {.panel-tabset}
+#### Figure
+```{r diag_fig}
+#| fig-height: 4
+#| fig-alt: "Minimum estimated propensity across the L1-L4 ladder for single-fit versus cross-fitted estimators, faceted by design. Both stay near 0.1 through L3; at L4 the single-fit minimum drops to 0 while the cross-fitted minimum holds at the 0.05 floor."
+diag_fig()
+```
+#### Table
+```{r diag}
+dt_show("sim_full_diagnostics.csv",
+        cols = c("Design"="scenario","Rung"="rung",
+                 "Fluct. (single-fit)"="eps_fa","g min (single-fit)"="g_fa_min","g max (single-fit)"="g_fa_max",
+                 "Fluct. (cross-fit)"="eps_cf","g min (cross-fit)"="g_cf_min","g max (cross-fit)"="g_cf_max",
+                 "DEFF"="deff","ICC"="icc_eif"),
+        sort = c("Rung"), page = 8,
+        caption = "Per-scenario diagnostics: targeting-fluctuation magnitude and single-fit vs cross-fitted propensity ranges (Web Table S5).")
+```
+:::
+
+## Supporting experiments
+
+Each experiment isolates one question. Use the tabs to move between them, and the
+**Figure / Table** toggle within each to switch between the picture and the
+numbers. The conclusion is the same throughout — only **cross-fitting** keeps the
+design-based interval valid as the learners grow complex.
+
+::: {.panel-tabset}
+
+### Correctly-specified control
+
+Under a **correctly specified** data-generating process the cross-fitted
+estimator is unbiased with nominal coverage; the bias of the headline cells
+appears only under the Kang–Schafer misspecification. *(Web Table S9)*
+
+::: {.panel-tabset}
+#### Figure
+```{r control_fig}
+#| fig-height: 4
+#| fig-alt: "Coverage by rung coloured by arm, faceted by correctly-specified versus Kang-Schafer model; under the correct model the cross-fitted arm holds near 0.95."
+coverage_fig("R01_simple_control_summary.csv", facet = "model_type",
+             facet_labels = c(simple = "Correctly specified", complex = "Kang–Schafer"))
+```
+#### Table
+```{r control}
+dt_show("R01_simple_control_summary.csv",
+        cols = c("Model"="model_type","Rung"="rung","Arm"="method",
+                 "Bias"="bias","SE/SD"="se_ratio","Coverage"="coverage"),
+        cover = "Coverage", page = 10, sort = c("Rung","Arm"),
+        caption = "Correctly-specified versus Kang–Schafer control (Web Table S9).")
+```
+:::
+
+### Cross-fitting isolation
+
+The 2×2 of {cross-fit, single-fit} × {weighted, unweighted}: cross-fitting is the
+active ingredient — single-fit under-covers regardless of weighting, and a
+matched check confirms **harmonizing the propensity floor** does not change it.
+*(Web Tables S10, S12)*
+
+::: {.panel-tabset}
+#### Figure
+```{r iso_fig}
+#| fig-height: 4
+#| fig-alt: "Coverage by rung for the four cross-fit/single-fit by weighted/unweighted combinations; the cross-fit arms hold near nominal while the single-fit arms drop at the interpolating rung."
+coverage_fig("R03_isolation_2x2_summary.csv")
+```
+#### Table
+```{r iso}
+dt_show("R03_isolation_2x2_summary.csv",
+        cols = c("Scenario"="scenario","Rung"="rung","Arm"="method",
+                 "Bias"="bias","SE/SD"="se_ratio","Coverage"="coverage"),
+        cover = "Coverage", page = 8, sort = c("Rung"),
+        caption = "Cross-fitting versus de-weighting isolation (Web Table S10).")
+dt_show("R16_harmonized_sim_summary.csv",
+        cols = c("g floor"="g_floor","q low"="q_lo","Scenario"="scenario","Rung"="rung",
+                 "Arm"="method","Coverage"="coverage"),
+        cover = "Coverage", page = 9, sort = c("Rung","Arm"),
+        caption = "Harmonized propensity-floor check (Web Table S12).")
+```
+:::
+
+### Double robustness
+
+The cross-fitted estimate is unbiased when **either** nuisance is correct; bias
+appears only when **both** are wrong (the lone off-zero panel). *(Web Table S11)*
+
+::: {.panel-tabset}
+#### Figure
+```{r dr_fig}
+#| fig-height: 4.5
+#| fig-alt: "Bias of the cross-fitted estimate at each of the four outcome/propensity correctness combinations, faceted by rung and sampling; bias sits at zero except when both the outcome and propensity models are wrong."
+dr_fig()
+```
+#### Table
+```{r dr}
+dt_show("R14_dr_factorial_summary.csv",
+        cols = c("Outcome model"="q_spec","Propensity model"="g_spec","Rung"="rung",
+                 "Arm"="method","Bias"="bias","Coverage"="coverage"),
+        cover = "Coverage", page = 15, sort = c("Rung"),
+        caption = "Double-robustness factorial: outcome × propensity (in)correctness (Web Table S11).")
+```
+:::
+
+### Nuisance product rate
+
+The sqrt(m)-scaled product nuisance error is flat through the deployable rungs and
+inflates only at the interpolating extreme. *(Web Tables S13–S14)*
+
+::: {.panel-tabset}
+#### Figure
+```{r ratesweep}
+#| fig-height: 4.5
+#| fig-alt: "Line plot of the square-root-of-m scaled product nuisance error against PSUs per stratum, one line per rung; L1 to L3 stay flat and low while L4 rises."
+rs <- load_ratesweep()
+p <- ggplot(rs, aes(base_m, mean_prod_sqrtm, colour = Rung, group = Rung, linetype = Rung,
+                    text = sprintf("%s\nm = %d\nsqrt(m) * product = %.3f", Rung, base_m, mean_prod_sqrtm))) +
+  geom_line(linewidth = 0.7) + geom_point(size = 2) +
+  scale_colour_manual(values = rung_palette) +
+  labs(x = "PSUs per stratum (m)", y = "sqrt(m) x product nuisance error",
+       colour = "Rung", linetype = "Rung") +
+  theme_minimal(base_size = 13)
+ggplotly(p, tooltip = "text")
+```
+#### Table
+```{r ratetable}
+dt_show("R04_nuisance_rate_summary.csv",
+        cols = c("Scenario"="scenario","Rung"="rung","sqrt(m).product"="mean_prod_sqrtm",
+                 "sd"="sd_prod_sqrtm","vs L1"="prod_sqrtm_vs_L1"), page = 8, sort = c("Rung"),
+        caption = "Nuisance product-rate diagnostic (Web Table S13).")
+```
+:::
+
+### Large-sample behaviour
+
+The single-fit collapse is **structural** — its coverage worsens as the number
+of clusters grows, while cross-fitting stays flat. *(Web Table S15)*
+
+::: {.panel-tabset}
+#### Figure
+```{r largem}
+#| fig-height: 4.5
+#| fig-alt: "Coverage against PSUs per stratum, faceted by rung, comparing single-fit Fully-Aware with cross-fitted Fully-Aware-CF; at the interpolating rungs single-fit stays near 0.1 as clusters grow while Fully-Aware-CF stays near 1.0."
+lm <- load_largem()
+lm <- lm[lm$Arm %in% c("Fully-Aware","Fully-Aware-CF"), ]
+lm$Arm <- droplevels(lm$Arm)
+p <- ggplot(lm, aes(base_m, coverage, colour = Arm, group = Arm,
+                    text = sprintf("%s\n%s\nm = %d (total %d)\ncoverage = %.3f",
+                                   Arm, Rung, base_m, m_total, coverage))) +
+  geom_hline(yintercept = 0.95, linetype = "dashed", colour = "grey55") +
+  geom_line(linewidth = 0.7) + geom_point(size = 2) + facet_wrap(~Rung) +
+  scale_colour_manual(values = estimator_palette) + scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "PSUs per stratum (m)", y = "95% CI coverage", colour = "Arm") +
+  theme_minimal(base_size = 12) + theme(legend.position = "bottom")
+ggplotly(p, tooltip = "text") |> layout(legend = list(orientation = "h", y = -0.2))
+```
+#### Table
+```{r largemtable}
+dt_show("R02_largem_sweep_summary.csv",
+        cols = c("Scenario"="scenario","Rung"="rung","m"="base_m","Total clusters"="m_total",
+                 "Arm"="method","SE/SD"="se_ratio","Coverage"="coverage"),
+        cover = "Coverage", page = 20, sort = c("Rung","Arm"),
+        caption = "Large-m sweep of the single-fit failure (Web Table S15).")
+```
+:::
+
+### Type-I error & power
+
+At a true null the recommended estimator controls type-I error (near 0.05); under
+an alternative it has calibrated power. Single-fit over-rejects at the
+interpolating rung. *(Web Table S6)*
+
+::: {.panel-tabset}
+#### Figure
+```{r typeI_fig}
+#| fig-height: 4
+#| fig-alt: "Rejection rate by rung coloured by arm, faceted by null versus alternative; at the null the cross-fitted arm stays near 0.05 while single-fit over-rejects at the interpolating rung."
+coverage_fig("R13_null_typeI_summary.csv", metric = "reject_rate", facet = "te",
+             ref = 0.05, ylab = "Rejection rate",
+             facet_labels = c(`0` = "Null (type-I error)", `0.3` = "Alternative (power)"))
+```
+#### Table
+```{r typeI}
+dt_show("R13_null_typeI_summary.csv",
+        cols = c("True effect"="te","Scenario"="scenario","Rung"="rung","Arm"="method",
+                 "Reject rate"="reject_rate","Coverage"="coverage"),
+        cover = "Coverage", page = 20, sort = c("Rung","Arm"),
+        caption = "Type-I error (true effect 0) and power at the null (Web Table S6).")
+```
+:::
+
+### External AIPW benchmark
+
+An independent survey-weighted AIPW shows the same single-fit collapse and
+cross-fit rescue — the requirement is not specific to TMLE. *(Web Table S7)*
+
+::: {.panel-tabset}
+#### Figure
+```{r aipw_fig}
+#| fig-height: 4
+#| fig-alt: "Coverage by rung for the AIPW single-fit, internal-CV, and cross-fit arms; only the cross-fit AIPW stays near nominal as the library reaches the non-Donsker rung."
+coverage_fig("R22_aipw_ladder_complete_summary.csv")
+```
+#### Table
+```{r aipw}
+dt_show("R22_aipw_ladder_complete_summary.csv",
+        cols = c("Scenario"="scenario","Rung"="rung","Estimator"="estimator","Arm"="method",
+                 "Bias"="bias","SE/SD"="se_ratio","Coverage"="coverage"),
+        cover = "Coverage", page = 10,
+        caption = "External survey-weighted AIPW benchmark (Web Table S7).")
+```
+:::
+
+### Deployable library
+
+On a library one would actually deploy, only cross-fitting is calibrated;
+single-fit and internal cluster-cross-validation under-cover, for both TMLE and
+AIPW. *(Web Table S8)*
+
+::: {.panel-tabset}
+#### Figure
+```{r deploy_fig}
+#| fig-height: 4.5
+#| fig-alt: "Coverage by rung faceted by TMLE versus AIPW; within each, the cross-fit arm holds near nominal while single-fit and internal-CV under-cover."
+coverage_fig("R21_deployable_cvcf_summary.csv", facet = "estimator")
+```
+#### Table
+```{r deployable}
+dt_show("R21_deployable_cvcf_summary.csv",
+        cols = c("Scenario"="scenario","Rung"="rung","Estimator"="estimator","Arm"="method",
+                 "SE/SD"="se_ratio","Coverage"="coverage"),
+        cover = "Coverage", page = 15,
+        caption = "Deployable library (L6–L7): internal CV versus cross-fit, TMLE and AIPW (Web Table S8).")
+```
+:::
+
+### Other estimands
+
+The cross-fitted estimator and its design variance extend to the risk-ratio and
+odds-ratio scales and to a continuous outcome. *(Web Table S16)*
+
+::: {.panel-tabset}
+#### Figure
+```{r estimands_fig}
+#| fig-height: 4
+#| fig-alt: "Coverage by rung faceted by binary versus continuous outcome for the cross-fitted estimator on the risk-difference scale; coverage stays near nominal."
+coverage_fig("A21_rr_or_continuous_rd_summary.csv", facet = "outcome")
+```
+#### Table
+```{r rrora}
+dt_show("A21_rr_or_continuous_rd_summary.csv",
+        cols = c("Outcome"="outcome","Rung"="rung","Arm"="method","Estimand"="estimand",
+                 "Bias"="bias","Coverage"="coverage","Mean width"="mean_width"),
+        cover = "Coverage", page = 9,
+        caption = "Risk-difference and continuous-outcome estimands (Web Table S16).")
+dt_show("A21_rr_or_continuous_rr_summary.csv",
+        cols = c("Outcome"="outcome","Rung"="rung","Arm"="method","Estimand"="estimand",
+                 "Coverage"="coverage","Mean width"="mean_width"),
+        cover = "Coverage", page = 9,
+        caption = "Risk-ratio and odds-ratio estimands (Web Table S16).")
+```
+:::
+
+:::

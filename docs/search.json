@@ -1,0 +1,198 @@
+[
+  {
+    "objectID": "simulation.html",
+    "href": "simulation.html",
+    "title": "Simulation results",
+    "section": "",
+    "text": "A two-stage stratified cluster sample with informative selection, analysed by five arms that differ only in how they use the design, swept across a Super Learner complexity ladder (L1 GLM to L4 deep interpolating random forest) under Design A (many PSUs per stratum) and Design B (two PSUs per stratum, NHANES-like). 1,000 replicates per cell. Each experiment offers a Figure view (the story at a glance) and a Table view (exact numbers, filterable)."
+  },
+  {
+    "objectID": "simulation.html#coverage-across-the-ladder",
+    "href": "simulation.html#coverage-across-the-ladder",
+    "title": "Simulation results",
+    "section": "Coverage across the ladder",
+    "text": "Coverage across the ladder\nSingle-fit Fully-Aware tracks nominal at the smooth rungs and collapses at the interpolating L4; the cross-fitted Fully-Aware-CF holds across the whole ladder.\n\nHeadline: coverage across the ladderFull results: all five arms, both designs\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSE/SD near 1 is calibrated; DEFF/ICC are the influence-function clustering design effect and intracluster correlation."
+  },
+  {
+    "objectID": "simulation.html#per-scenario-diagnostics",
+    "href": "simulation.html#per-scenario-diagnostics",
+    "title": "Simulation results",
+    "section": "Per-scenario diagnostics",
+    "text": "Per-scenario diagnostics\nSingle-fit (_fa) versus cross-fitted (_cf) propensity ranges and the targeting-fluctuation magnitude. At the interpolating rung L4 the single-fit propensity collapses to the full 0–1 range (positivity near-violation) while cross-fitting stays bounded at the 0.05 floor.\n\nFigureTable"
+  },
+  {
+    "objectID": "simulation.html#supporting-experiments",
+    "href": "simulation.html#supporting-experiments",
+    "title": "Simulation results",
+    "section": "Supporting experiments",
+    "text": "Supporting experiments\nEach experiment isolates one question. Use the tabs to move between them, and the Figure / Table toggle within each to switch between the picture and the numbers. The conclusion is the same throughout — only cross-fitting keeps the design-based interval valid as the learners grow complex.\n\nCorrectly-specified controlCross-fitting isolationDouble robustnessNuisance product rateLarge-sample behaviourType-I error & powerExternal AIPW benchmarkDeployable libraryOther estimands\n\n\nUnder a correctly specified data-generating process the cross-fitted estimator is unbiased with nominal coverage; the bias of the headline cells appears only under the Kang–Schafer misspecification. (Web Table S9)\n\nFigureTable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe 2×2 of {cross-fit, single-fit} × {weighted, unweighted}: cross-fitting is the active ingredient — single-fit under-covers regardless of weighting, and a matched check confirms harmonizing the propensity floor does not change it. (Web Tables S10, S12)\n\nFigureTable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe cross-fitted estimate is unbiased when either nuisance is correct; bias appears only when both are wrong (the lone off-zero panel). (Web Table S11)\n\nFigureTable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe sqrt(m)-scaled product nuisance error is flat through the deployable rungs and inflates only at the interpolating extreme. (Web Tables S13–S14)\n\nFigureTable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe single-fit collapse is structural — its coverage worsens as the number of clusters grows, while cross-fitting stays flat. (Web Table S15)\n\nFigureTable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAt a true null the recommended estimator controls type-I error (near 0.05); under an alternative it has calibrated power. Single-fit over-rejects at the interpolating rung. (Web Table S6)\n\nFigureTable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAn independent survey-weighted AIPW shows the same single-fit collapse and cross-fit rescue — the requirement is not specific to TMLE. (Web Table S7)\n\nFigureTable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nOn a library one would actually deploy, only cross-fitting is calibrated; single-fit and internal cluster-cross-validation under-cover, for both TMLE and AIPW. (Web Table S8)\n\nFigureTable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe cross-fitted estimator and its design variance extend to the risk-ratio and odds-ratio scales and to a continuous outcome. (Web Table S16)\n\nFigureTable"
+  },
+  {
+    "objectID": "nhanes.html",
+    "href": "nhanes.html",
+    "title": "NHANES applications",
+    "section": "",
+    "text": "Four contemporary questions in NHANES (2007–2018), chosen to span exposure prevalence and overlap. Each estimand is the population average treatment effect on the risk-difference scale, estimated under all five design-awareness arms; the primary arm is Fully-Aware-CF (emphasized in the forest)."
+  },
+  {
+    "objectID": "nhanes.html#cross-example-overview",
+    "href": "nhanes.html#cross-example-overview",
+    "title": "NHANES applications",
+    "section": "Cross-example overview",
+    "text": "Cross-example overview\n\nForestTable\n\n\n\n\n\n\n\n\nThe point estimate is broadly stable across arms; what shifts is the uncertainty (and, in E3, whether the interval excludes zero — it does for the naive Non-Aware arm but not for the design-aware arms). The primary Fully-Aware-CF arm is drawn larger.\n\n\n\n\n\n\n\n\n\n\n\n\nDesign, overlap, and covariate-set robustness\nDomain size, exposure/outcome prevalence, and single-fit (_fa) versus cross-fitted (_cf) propensity ranges. Poor overlap (E3, E4) is where the single-fit propensity approaches the boundary.\n\n\n\n\n\n\nThe conclusions are largely stable across alternative adjustment sets: E1, E2, and E4 are unchanged. The exception is E3, where dropping BMI — a strong predictor of the outcome — turns the e-cigarette → hypertension null borderline-significant. Consistent with the paper’s over-adjustment reading, the fully-adjusted design-aware estimate (which covers zero) remains the primary one (see the E3 tab and Web Appendix F)."
+  },
+  {
+    "objectID": "nhanes.html#sample-descriptions",
+    "href": "nhanes.html#sample-descriptions",
+    "title": "NHANES applications",
+    "section": "Sample descriptions",
+    "text": "Sample descriptions\nSurvey-weighted characteristics of each analytic domain by exposure group, with standardized mean differences (SMD). These are the per-example Table 1s in Web Appendix E.\n\nE1E2E3E4\n\n\n\nBalance (SMD)Table 1\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nBalance (SMD)Table 1\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nBalance (SMD)Table 1\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nBalance (SMD)Table 1"
+  },
+  {
+    "objectID": "nhanes.html#by-question",
+    "href": "nhanes.html#by-question",
+    "title": "NHANES applications",
+    "section": "By question",
+    "text": "By question\nEach tab collects everything available for that question. The cross-example forest above shows all four side by side.\n\nE1: Short sleep → obesityE2: Food insecurity → depressionE3: E-cigarette use → hypertensionE4: GDM history → hypertension\n\n\nCommon exposure, excellent overlap: all arms agree and the design-aware interval is roughly a third wider than the naive one.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nIgnoring the weights understates the association, though both intervals exclude zero — the weights change the magnitude, not the qualitative finding.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe naive Non-Aware analysis returns an apparently significant association, but survey-weighting alone moves the estimate to an interval covering zero — the apparent association is removed at the weighting step, not by cross-fitting.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nRare exposure: the single-fit propensity reaches 0.003 (a near-violation of positivity) while the cross-fitted propensities are held at or above the 0.05 floor, and the primary risk difference is near zero."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Cross-Fitted Survey-Weighted TMLE",
+    "section": "",
+    "text": "This site is the interactive companion to Cross-Fitted Survey-Weighted TMLE with Design-Based Variance for Causal Machine Learning (M. Ehsan Karim). It reproduces the paper’s simulation and NHANES results: every figure and table here is rebuilt from the manuscript’s frozen result files (multiple imputation, \\(m = 40\\)) and is labelled with its location in the paper — a main-text Table/Figure or a Web Table."
+  },
+  {
+    "objectID": "index.html#the-three-messages",
+    "href": "index.html#the-three-messages",
+    "title": "Cross-Fitted Survey-Weighted TMLE",
+    "section": "The three messages",
+    "text": "The three messages\n\n  \n    ⚖️\n    Weights → point estimate\n    Ignoring the survey weights biases the point estimate — it targets a sample, not the population, quantity. (See NHANES.)\n  \n  \n    🧱\n    Clustered variance → honest CI\n    Ignoring stratification and clustering understates uncertainty: the interval is too narrow even when the point estimate is right. (See Robustness.)\n  \n  \n    🔁\n    Cross-fitting → valid ML inference\n    Flexible machine learning without cross-fitting under-covers once the learners cross a complexity boundary; PSU-level cross-fitting restores it. (See Simulation.)"
+  },
+  {
+    "objectID": "index.html#explore",
+    "href": "index.html#explore",
+    "title": "Cross-Fitted Survey-Weighted TMLE",
+    "section": "Explore",
+    "text": "Explore\n\nThe simulation — the full Web Appendix D: the headline coverage ladder, the complete results table, and every supporting experiment (correctly-specified control, the cross-fitting isolation, double robustness, the nuisance product rate, large-sample behaviour, type-I/power, the AIPW benchmark, the deployable CV-vs-CF comparison, and other estimands).\nThe NHANES applications — the population risk difference for four contemporary questions (E1–E4) under five arms, plus multiple imputation, the propensity-floor diagnostics, the single-fit-vs-cross-fit divergence, the covariate-set sensitivity checks, and an external AIPW cross-check.\nRobustness & sensitivity — informative selection, the finite-population correction, a high-design-effect stress, and jackknife versus linearization variance.\nMethods — a one-page, plain-language recap of the estimator and the design-based variance.\n\n\n\n\n\n\n\nNote\n\n\n\nThe recommended estimator is Fully-Aware-CF (survey-weighted, cross-fitted at the primary-sampling-unit level). It is the arm the paper’s theory covers for machine-learning nuisances."
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "This site is the interactive results companion to:\n\nM. Ehsan Karim. Cross-Fitted Survey-Weighted TMLE with Design-Based Variance for Causal Machine Learning. Manuscript, 2026."
+  },
+  {
+    "objectID": "about.html#citation",
+    "href": "about.html#citation",
+    "title": "About",
+    "section": "",
+    "text": "This site is the interactive results companion to:\n\nM. Ehsan Karim. Cross-Fitted Survey-Weighted TMLE with Design-Based Variance for Causal Machine Learning. Manuscript, 2026."
+  },
+  {
+    "objectID": "about.html#code-and-data",
+    "href": "about.html#code-and-data",
+    "title": "About",
+    "section": "Code and data",
+    "text": "Code and data\n\nThe estimator, simulation engine, and NHANES analysis code live in the public code repository, https://github.com/ehsanx/Survey-TMLE-codes.\nThe numbers shown here are pre-computed and frozen: every plot and table is rebuilt from the CSVs in data/, which are snapshots of the manuscript’s result files (multiple imputation, \\(m = 40\\)).\nThe manuscript and Web Appendix are the source of record. This site is a convenience layer; if any number here ever differs from the paper, the paper governs.\nData source: the U.S. National Health and Nutrition Examination Survey (NHANES), publicly available from the National Center for Health Statistics."
+  },
+  {
+    "objectID": "about.html#how-this-site-is-built",
+    "href": "about.html#how-this-site-is-built",
+    "title": "About",
+    "section": "How this site is built",
+    "text": "How this site is built\nA static Quarto website rendered to docs/ and served from GitHub Pages — no server, no live computation. See the README.md for the build and deploy steps."
+  },
+  {
+    "objectID": "about.html#contact",
+    "href": "about.html#contact",
+    "title": "About",
+    "section": "Contact",
+    "text": "Contact\nM. Ehsan Karim — School of Population and Public Health, University of British Columbia, and Centre for Advancing Health Outcomes, St. Paul’s Hospital, Vancouver, Canada. ehsan.karim@ubc.ca"
+  },
+  {
+    "objectID": "about.html#license",
+    "href": "about.html#license",
+    "title": "About",
+    "section": "License",
+    "text": "License\nCode: MIT. Text and figures: CC BY 4.0."
+  },
+  {
+    "objectID": "methods.html",
+    "href": "methods.html",
+    "title": "Methods in brief",
+    "section": "",
+    "text": "A one-page, plain-language recap. The full theory, proofs, and implementation are in the paper and its Web Appendix."
+  },
+  {
+    "objectID": "methods.html#the-problem",
+    "href": "methods.html#the-problem",
+    "title": "Methods in brief",
+    "section": "The problem",
+    "text": "The problem\nTargeted maximum likelihood estimation (TMLE) pairs machine learning with semiparametric efficiency theory to estimate causal effects. Its standard theory assumes independent observations — but complex surveys (like NHANES) have stratification, clustering, and unequal selection. Treating survey data as i.i.d. gets both pieces wrong:\n\nignoring the weights biases the point estimate (it targets a sample, not the population, quantity);\nignoring the clustered design understates the variance, so confidence intervals are too narrow."
+  },
+  {
+    "objectID": "methods.html#the-estimator",
+    "href": "methods.html#the-estimator",
+    "title": "Methods in brief",
+    "section": "The estimator",
+    "text": "The estimator\nWe develop a survey-aware TMLE for the population average treatment effect. Its variance is obtained by Taylor-series linearization of the estimator’s influence function, treating the primary sampling unit (PSU) as the independent replication unit. Within explicit conditions, the estimator is asymptotically normal and the linearization variance is design-consistent under a stratified multistage design."
+  },
+  {
+    "objectID": "methods.html#the-central-result-cross-fitting-restores-valid-inference",
+    "href": "methods.html#the-central-result-cross-fitting-restores-valid-inference",
+    "title": "Methods in brief",
+    "section": "The central result: cross-fitting restores valid inference",
+    "text": "The central result: cross-fitting restores valid inference\nWith flexible machine-learning nuisances, valid variance turns on cross-fitting at the PSU level: among the estimators evaluated, only out-of-fold (cross-fitted) fitting keeps coverage valid. A single-fit survey TMLE can severely under-cover once the learners cross a complexity (Donsker) boundary — and internal cluster-aware cross-validation does not substitute for cross-fitting. The simulation shows this directly: coverage collapses at the interpolating rung for single-fit, while the cross-fitted arm stays near nominal."
+  },
+  {
+    "objectID": "methods.html#the-five-arms",
+    "href": "methods.html#the-five-arms",
+    "title": "Methods in brief",
+    "section": "The five arms",
+    "text": "The five arms\n\n\n\n\n\n\n\n\n\nArm\nWeights\nVariance\nNuisance fitting\n\n\n\n\nNon-Aware\nignored\ni.i.d.\nsingle-fit\n\n\nPartially-Aware\nused\ni.i.d.\nsingle-fit\n\n\nFully-Aware\nused\ndesign-based\nsingle-fit\n\n\nFully-Aware-CV\nused\ndesign-based\ninternal cluster-CV\n\n\nFully-Aware-CF (recommended)\nused\ndesign-based\nPSU-level cross-fitting\n\n\n\nFully-Aware-CF is the arm the theory covers for machine-learning nuisances."
+  },
+  {
+    "objectID": "robustness.html",
+    "href": "robustness.html",
+    "title": "Robustness & sensitivity",
+    "section": "",
+    "text": "Method-robustness checks on synthetic data with known truth — each stresses the recommended estimator on a design feature the headline simulation holds fixed. Use the Figure / Table toggle in each to switch between the picture and the numbers."
+  },
+  {
+    "objectID": "robustness.html#robustness-to-informative-selection",
+    "href": "robustness.html#robustness-to-informative-selection",
+    "title": "Robustness & sensitivity",
+    "section": "Robustness to informative selection",
+    "text": "Robustness to informative selection\nWhen selection is informative beyond the measured confounders, the de-weighted out-of-fold fits still hold: coverage stays near nominal across the sweep of the informativeness parameter \\(\\rho\\). (Web Table S33)\n\nFigureTable"
+  },
+  {
+    "objectID": "robustness.html#finite-population-correction",
+    "href": "robustness.html#finite-population-correction",
+    "title": "Robustness & sensitivity",
+    "section": "Finite-population correction",
+    "text": "Finite-population correction\nOmitting the finite-population correction (FPC) does not over-cover when the sampling fraction is non-negligible — coverage is calibrated and flat in the fraction, confirming the no-correction variance is the safe, conservative choice. (Web Table S25)\n\nFigureTable"
+  },
+  {
+    "objectID": "robustness.html#high-design-effect-stress-design-c",
+    "href": "robustness.html#high-design-effect-stress-design-c",
+    "title": "Robustness & sensitivity",
+    "section": "High design-effect stress (Design C)",
+    "text": "High design-effect stress (Design C)\nA stress design that roughly doubles the influence-function clustering design effect (DEFF). The recommended estimator stays at or above nominal while the design-naive arms degrade more sharply. (Web Table S26)\n\nFigureTable"
+  },
+  {
+    "objectID": "robustness.html#jackknife-versus-linearization-variance",
+    "href": "robustness.html#jackknife-versus-linearization-variance",
+    "title": "Robustness & sensitivity",
+    "section": "Jackknife versus linearization variance",
+    "text": "Jackknife versus linearization variance\nThe inexpensive Taylor-linearization standard error is not optimistic relative to a delete-one-PSU jackknife: the two SE/SD ratios and the two coverages agree (shown as a table, since it is a direct method-to-method comparison). (Web Table S27)"
+  },
+  {
+    "objectID": "robustness.html#variance-method-benchmark-web-appendix-g",
+    "href": "robustness.html#variance-method-benchmark-web-appendix-g",
+    "title": "Robustness & sensitivity",
+    "section": "Variance-method benchmark (Web Appendix G)",
+    "text": "Variance-method benchmark (Web Appendix G)\nOn the smallest NHANES domain (E3), six routes to the standard error of the same fitted cross-fitted estimator agree to within 3%, while the only route that re-fits the machine-learning nuisances (the full cluster bootstrap) costs about 15 million times more core-seconds — so the design-based linearization standard error is both valid and essentially free. The compute landscape shows that the primary cross-fitted estimator is computationally practical, not V times more costly than a single fit. (Web Tables S35–S36.)\n\nSix variance routes (Web Table S35)\n\nFigureTable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCompute landscape (Web Table S36)\n\nFigureTable"
+  }
+]

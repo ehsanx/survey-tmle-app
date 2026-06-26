@@ -1,0 +1,39 @@
+---
+title: "About"
+---
+
+## Citation
+
+This site is the interactive results companion to:
+
+> M. Ehsan Karim. *Cross-Fitted Survey-Weighted TMLE with Design-Based Variance
+> for Causal Machine Learning.* Manuscript, 2026.
+
+## Code and data
+
+- The estimator, simulation engine, and NHANES analysis code live in the public
+  code repository, <https://github.com/ehsanx/Survey-TMLE-codes>.
+- The numbers shown here are pre-computed and **frozen**: every plot and table is
+  rebuilt from the CSVs in `data/`, which are snapshots of the manuscript's
+  result files (multiple imputation, $m = 40$).
+- **The manuscript and Web Appendix are the source of record.** This site is a
+  convenience layer; if any number here ever differs from the paper, the paper
+  governs.
+- Data source: the U.S. National Health and Nutrition Examination Survey
+  (NHANES), publicly available from the National Center for Health Statistics.
+
+## How this site is built
+
+A static [Quarto](https://quarto.org) website rendered to `docs/` and served
+from GitHub Pages — no server, no live computation. See the `README.md` for the
+build and deploy steps.
+
+## Contact
+
+M. Ehsan Karim — School of Population and Public Health, University of British
+Columbia, and Centre for Advancing Health Outcomes, St. Paul's Hospital,
+Vancouver, Canada. `ehsan.karim@ubc.ca`
+
+## License
+
+Code: MIT. Text and figures: CC BY 4.0.

@@ -1,0 +1,14 @@
+# Quarto
+/.quarto/
+*_files/
+/_site/
+
+# R
+.Rproj.user/
+.Rhistory
+.RData
+.Rapp.history
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,181 @@
+---
+title: "Robustness & sensitivity"
+---
+
+```{r setup}
+#| include: false
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(ggplot2); library(plotly); library(DT)
+source("R/load_data.R")
+```
+
+Method-robustness checks on **synthetic data with known truth** — each stresses
+the recommended estimator on a design feature the headline simulation holds fixed.
+Use the **Figure / Table** toggle in each to switch between the picture and the
+numbers.
+
+::: {.callout-note appearance="simple"}
+**Coverage shading.** Cells are **green** at/above 0.935 (near nominal),
+**amber** 0.90–0.935 (slightly low), and **red** below 0.90 (collapsed); the
+nominal target is 0.95.
+:::
+
+## Robustness to informative selection
+
+When selection is informative **beyond** the measured confounders, the
+de-weighted out-of-fold fits still hold: coverage stays near nominal across the
+sweep of the informativeness parameter $\rho$. *(Web Table S33)*
+
+::: {.panel-tabset}
+#### Figure
+```{r informative_fig}
+#| fig-height: 4
+#| fig-alt: "Coverage against the informativeness parameter rho, faceted by rung, for the weighted and unweighted out-of-fold cross-fitted fits; coverage stays near the nominal 0.95 across the sweep."
+coverage_fig("R07_informative_summary.csv", xvar = "rho", facet = "rung",
+             facet_labels = rung_labels, xlab = "informativeness ρ")
+```
+#### Table
+```{r informative}
+dt_show("R07_informative_summary.csv",
+        cols = c("rho"="rho","Rung"="rung","Arm"="method","Bias"="bias",
+                 "SE/SD"="se_ratio","Coverage"="coverage"),
+        cover = "Coverage", page = 12, sort = c("Rung"),
+        caption = "Robustness to informative selection beyond the confounders (Web Table S33).")
+```
+:::
+
+## Finite-population correction
+
+Omitting the finite-population correction (FPC) does **not** over-cover when the
+sampling fraction is non-negligible — coverage is calibrated and flat in the
+fraction, confirming the no-correction variance is the safe, conservative choice.
+*(Web Table S25)*
+
+::: {.panel-tabset}
+#### Figure
+```{r fpc_fig}
+#| fig-height: 4
+#| fig-alt: "Coverage by rung for the Fully-Aware and Fully-Aware-CF arms with and without the finite-population correction; coverage is near nominal either way."
+coverage_fig("R10_fpc_partA_summary.csv", facet = "fpc",
+             facet_labels = c(no = "no FPC", yes = "with FPC"))
+```
+#### Table
+```{r fpc}
+dt_show("R10_fpc_partA_summary.csv",
+        cols = c("Scenario"="scenario","Rung"="rung","Arm"="method","FPC"="fpc",
+                 "SE/SD"="se_ratio","Coverage"="coverage"),
+        cover = "Coverage", page = 8, sort = c("Rung","Arm"),
+        caption = "Finite-population-correction robustness (Web Table S25).")
+dt_show("R10_fpc_fraction_sweep.csv",
+        cols = c("Scenario"="scenario","Rung"="rung","FPC"="fpc","Fraction"="frac",
+                 "Pop. size"="N_pop","Coverage"="coverage"),
+        cover = "Coverage", page = 6,
+        caption = "Coverage across the first-stage sampling fraction (Web Table S25).")
+```
+:::
+
+## High design-effect stress (Design C)
+
+A stress design that roughly doubles the influence-function clustering design
+effect (DEFF). The recommended estimator stays at or above nominal while the
+design-naive arms degrade more sharply. *(Web Table S26)*
+
+::: {.panel-tabset}
+#### Figure
+```{r highdeff_fig}
+#| fig-height: 4
+#| fig-alt: "Coverage by rung for the five arms under the high-design-effect Design C; the cross-fitted Fully-Aware-CF stays at or above nominal while the design-naive arms drop."
+coverage_fig("R12_highdeff_pooled.csv")
+```
+#### Table
+```{r highdeff}
+dt_show("R12_highdeff_pooled.csv",
+        cols = c("Scenario"="scenario","Rung"="rung","Arm"="method","SE/SD"="se_ratio",
+                 "Coverage"="coverage","DEFF"="deff_clust"),
+        cover = "Coverage", page = 13, sort = c("Rung","Arm"),
+        caption = "High design-effect stress design (Web Table S26).")
+```
+:::
+
+## Jackknife versus linearization variance
+
+The inexpensive Taylor-linearization standard error is not optimistic relative to
+a delete-one-PSU jackknife: the two SE/SD ratios and the two coverages agree
+(shown as a table, since it is a direct method-to-method comparison).
+*(Web Table S27)*
+
+```{r jackknife}
+dt_show("R11_resampling_eff_summary.csv",
+        cols = c("Scenario"="scenario","Rung"="rung","Arm"="method",
+                 "SE/SD (Taylor)"="se_ratio_taylor","SE/SD (jackknife)"="se_ratio_jack",
+                 "Coverage (Taylor)"="coverage_taylor","Coverage (jackknife)"="coverage_jack",
+                 "Jack/lin SE ratio"="jk_lin_ratio"),
+        cover = "Coverage (Taylor)", page = 12, sort = c("Rung","Arm"),
+        keep = list(kind = "jack"),
+        caption = "Jackknife versus linearization variance (Web Table S27). Each row carries both the Taylor and the delete-one-PSU jackknife SE/SD and coverage for the same fit.")
+```
+
+## Variance-method benchmark (Web Appendix G)
+
+On the smallest NHANES domain (E3), six routes to the standard error of the
+**same** fitted cross-fitted estimator agree to within 3%, while the only route
+that re-fits the machine-learning nuisances (the full cluster bootstrap) costs
+about 15 million times more core-seconds — so the design-based linearization
+standard error is both valid and essentially free. The compute landscape shows
+that the primary cross-fitted estimator is computationally practical, not *V*
+times more costly than a single fit. *(Web Tables S35–S36.)*
+
+### Six variance routes (Web Table S35)
+
+::: {.panel-tabset}
+#### Figure
+```{r bench_variance_fig}
+#| fig-height: 3.2
+suppressMessages({ library(ggplot2); library(plotly) })
+bv <- read_csv_app("bench_variance.csv"); bv$method <- factor(bv$method, levels = rev(bv$method))
+p <- ggplot(bv, aes(se, method, text = sprintf("%s\nSE = %.4f (SE/lin %.2f)\nwall %s s", method, se, se_ratio, wall_s))) +
+  geom_vline(xintercept = 0.0199, linetype = "dashed", colour = "grey55") +
+  geom_segment(aes(x = 0.0199, xend = se, yend = method), colour = "#0072B2", linewidth = 0.5) +
+  geom_point(size = 2.6, colour = "#0072B2") +
+  labs(x = "Standard error of the same Fully-Aware-CF fit (E3)", y = NULL,
+       subtitle = "Dashed line: linearization SE. All six routes agree within 3%.") +
+  theme_minimal(base_size = 12)
+ggplotly(p, tooltip = "text")
+```
+#### Table
+```{r bench_variance}
+bv <- read_csv_app("bench_variance.csv")
+names(bv) <- c("Variance method","Refit?","Nuisance unc.?","SE","SE/lin.","95% CI","Wall (s)","Core-sec/lin.")
+DT::datatable(bv, rownames = FALSE,
+              caption = "Six variance routes for the primary Fully-Aware-CF estimator on E3 (point estimate 0.038, single imputation; df = 30, design effect 2.57). Web Table S35.",
+              options = list(pageLength = 6, dom = "t", scrollX = TRUE)) |>
+  DT::formatRound("SE", 4) |> DT::formatRound("SE/lin.", 2)
+```
+:::
+
+### Compute landscape (Web Table S36)
+
+::: {.panel-tabset}
+#### Figure
+```{r bench_compute_fig}
+#| fig-height: 3.6
+suppressMessages({ library(ggplot2); library(plotly) })
+bc <- read_csv_app("bench_compute.csv"); bc$estimator <- factor(bc$estimator, levels = rev(bc$estimator))
+p <- ggplot(bc, aes(total_s, estimator, text = sprintf("%s\ntotal %.1f s (V=%.0f, refits=%.0f)", estimator, total_s, as.numeric(V), as.numeric(refits)))) +
+  geom_segment(aes(x = 0.1, xend = total_s, yend = estimator), colour = "#117733", linewidth = 0.5) +
+  geom_point(size = 2.6, colour = "#117733") + scale_x_log10() +
+  labs(x = "Total compute time (s, log scale)", y = NULL,
+       subtitle = "The primary cross-fitted estimator (~34 s) is cheaper than the single-fit arms (112–194 s).") +
+  theme_minimal(base_size = 12)
+ggplotly(p, tooltip = "text")
+```
+#### Table
+```{r bench_compute}
+bc <- read_csv_app("bench_compute.csv")
+names(bc) <- c("Estimator / estimand","V","Refits","Point: wall (s)","Point: CPU (s)","Cores","Design SE (s)","Total (s)")
+DT::datatable(bc, rownames = FALSE,
+              caption = "Compute landscape across estimators and estimands on E3 (single imputation, single-core); the design-based SE is a frozen-influence-function plug-in costing about 0.1 s. Web Table S36.",
+              options = list(pageLength = 10, dom = "t", scrollX = TRUE)) |>
+  DT::formatRound(c("Point: wall (s)","Point: CPU (s)","Total (s)"), 1) |> DT::formatRound("Design SE (s)", 2)
+```
+:::

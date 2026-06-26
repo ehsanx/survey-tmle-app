@@ -1,0 +1,52 @@
+---
+title: "Methods in brief"
+---
+
+A one-page, plain-language recap. The full theory, proofs, and implementation
+are in the paper and its Web Appendix.
+
+## The problem
+
+Targeted maximum likelihood estimation (TMLE) pairs machine learning with
+semiparametric efficiency theory to estimate causal effects. Its standard theory
+assumes **independent observations** — but complex surveys (like NHANES) have
+**stratification, clustering, and unequal selection**. Treating survey data as
+i.i.d. gets both pieces wrong:
+
+- ignoring the **weights** biases the point estimate (it targets a sample, not
+  the population, quantity);
+- ignoring the **clustered design** understates the variance, so confidence
+  intervals are too narrow.
+
+## The estimator
+
+We develop a **survey-aware TMLE** for the population average treatment effect.
+Its variance is obtained by **Taylor-series linearization** of the estimator's
+influence function, treating the **primary sampling unit (PSU)** as the
+independent replication unit. Within explicit conditions, the estimator is
+asymptotically normal and the linearization variance is design-consistent under
+a stratified multistage design.
+
+## The central result: cross-fitting restores valid inference
+
+With flexible machine-learning nuisances, valid variance **turns on
+cross-fitting at the PSU level**: among the estimators evaluated, only
+out-of-fold (cross-fitted) fitting keeps coverage valid. A single-fit survey
+TMLE can severely under-cover once the learners cross a complexity (Donsker)
+boundary — and
+internal cluster-aware cross-validation does **not** substitute for
+cross-fitting. The [simulation](simulation.qmd) shows this directly: coverage
+collapses at the interpolating rung for single-fit, while the cross-fitted arm
+stays near nominal.
+
+## The five arms
+
+| Arm | Weights | Variance | Nuisance fitting |
+|---|---|---|---|
+| **Non-Aware** | ignored | i.i.d. | single-fit |
+| **Partially-Aware** | used | i.i.d. | single-fit |
+| **Fully-Aware** | used | design-based | single-fit |
+| **Fully-Aware-CV** | used | design-based | internal cluster-CV |
+| **Fully-Aware-CF** *(recommended)* | used | design-based | **PSU-level cross-fitting** |
+
+`Fully-Aware-CF` is the arm the theory covers for machine-learning nuisances.

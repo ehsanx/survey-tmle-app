@@ -1,0 +1,319 @@
+---
+title: "NHANES applications"
+---
+
+```{r setup}
+#| include: false
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(ggplot2); library(plotly); library(DT)
+source("R/load_data.R")
+nh <- load_nhanes()
+```
+
+Four contemporary questions in NHANES (2007–2018), chosen to span exposure
+prevalence and overlap. Each estimand is the population average treatment effect
+on the **risk-difference** scale, estimated under all five design-awareness
+**arms**; the primary arm is **Fully-Aware-CF** (emphasized in the forest).
+
+::: {.callout-note appearance="simple"}
+The four questions: **E1** short sleep → obesity · **E2** food insecurity →
+depression · **E3** e-cigarette use → hypertension · **E4** gestational-diabetes
+history → hypertension.
+:::
+
+::: {.callout-note}
+The cross-example forest and five-arm table now report the **$m=40$
+multiple-imputation** estimates, matching the paper's Table 3 and Figure 2.
+:::
+
+## Cross-example overview
+
+::: {.panel-tabset}
+#### Forest
+```{r forest}
+#| fig-height: 6.5
+#| fig-alt: "Forest plot of the population risk difference with 95% confidence intervals for four NHANES questions, one panel per question, five arms each, with the primary Fully-Aware-CF arm drawn with a larger point and bolder interval. Point estimates are broadly stable across arms within each panel; the design-aware intervals are wider than the naive Non-Aware one. In the e-cigarette panel only the Non-Aware interval lies entirely to the right of zero, while the design-aware intervals include zero."
+nh$cert <- nh$Arm == "Fully-Aware-CF"
+p <- ggplot(nh, aes(b, Arm, colour = Arm,
+                    text = sprintf("%s\nRD = %.3f (%.3f, %.3f)\ndf = %g", Arm, b, lcl, ucl, df))) +
+  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey55") +
+  geom_errorbarh(aes(xmin = lcl, xmax = ucl, linewidth = cert), height = 0.25) +
+  geom_point(aes(size = cert)) +
+  scale_linewidth_manual(values = c(`FALSE` = 0.6, `TRUE` = 1.2), guide = "none") +
+  scale_size_manual(values = c(`FALSE` = 2.2, `TRUE` = 3.6), guide = "none") +
+  facet_wrap(~Example, scales = "free_x", ncol = 1) +
+  scale_colour_manual(values = estimator_palette) +
+  labs(x = "Population risk difference (95% CI)", y = NULL) +
+  theme_minimal(base_size = 13) + theme(legend.position = "none")
+ggplotly(p, tooltip = "text")
+```
+
+The point estimate is broadly stable across arms; what shifts is the
+**uncertainty** (and, in E3, whether the interval excludes zero — it does for the
+naive `Non-Aware` arm but not for the design-aware arms). The primary
+**Fully-Aware-CF** arm is drawn larger.
+
+#### Table
+```{r fivearm}
+ft <- nh[, c("Example","Arm","b","se","lcl","ucl","df")]
+names(ft) <- c("Example","Arm","Risk diff.","SE","Lower","Upper","df")
+datatable(ft, filter = "top", rownames = FALSE,
+          caption = "Five-arm population risk difference, m = 40 multiple imputation (main-text Table 3).",
+          options = list(pageLength = 20, scrollX = TRUE, order = list())) |>
+  formatRound(c("Risk diff.","SE","Lower","Upper"), 3)
+```
+:::
+
+### Design, overlap, and covariate-set robustness
+
+Domain size, exposure/outcome prevalence, and single-fit (`_fa`) versus
+cross-fitted (`_cf`) propensity ranges. Poor overlap (E3, E4) is where the
+single-fit propensity approaches the boundary.
+
+```{r diag}
+dt_show("local_preview_diagnostics.csv",
+        cols = c("Example"="example","n (domain)"="n_domain","Exposure prev."="A_prev",
+                 "Outcome prev."="Y_prev","g FA min"="g_fa_min","g FA max"="g_fa_max",
+                 "g CF min"="g_cf_min","g CF max"="g_cf_max"), page = 8,
+        caption = "Per-example domain size, prevalence, and propensity ranges.")
+```
+
+The conclusions are largely stable across alternative adjustment sets: E1, E2, and
+E4 are unchanged. The exception is E3, where dropping BMI — a strong predictor of the
+outcome — turns the e-cigarette → hypertension null borderline-significant. Consistent
+with the paper's over-adjustment reading, the fully-adjusted design-aware estimate
+(which covers zero) remains the primary one (see the E3 tab and Web Appendix F).
+
+```{r senschange}
+dt_show("R09_sensitivity_delta.csv",
+        cols = c("Example"="example","Dropped"="dropped","delta RD"="d_b",
+                 "Relative delta"="rel_d_b","Conclusion flips?"="conclusion_flip"), page = 6,
+        caption = "Effect of dropping/adding a covariate on each conclusion (Web Table S34).")
+```
+
+## Sample descriptions
+
+Survey-weighted characteristics of each analytic domain by exposure group, with
+standardized mean differences (SMD). These are the per-example Table 1s in **Web
+Appendix E**.
+
+::: {.panel-tabset}
+
+### E1
+::: {.panel-tabset}
+#### Balance (SMD)
+```{r smd_e1}
+#| fig-height: 5
+smd_fig("E1")
+```
+#### Table 1
+```{r t1_e1}
+dt_show("nhanes_table1.csv", ex = "E1",
+        cols = c("Characteristic"="characteristic","Overall"="overall",
+                 "7–9 h sleep"="unexposed","Short sleep"="exposed","SMD"="smd"),
+        page = 30, caption = "E1: short sleep (<7 h) vs 7–9 h. Cells are survey-weighted % or mean (SD). Web Appendix E.")
+```
+:::
+
+### E2
+::: {.panel-tabset}
+#### Balance (SMD)
+```{r smd_e2}
+#| fig-height: 5
+smd_fig("E2")
+```
+#### Table 1
+```{r t1_e2}
+dt_show("nhanes_table1.csv", ex = "E2",
+        cols = c("Characteristic"="characteristic","Overall"="overall",
+                 "Food secure"="unexposed","Food insecure"="exposed","SMD"="smd"),
+        page = 30, caption = "E2: household food insecurity vs secure. Cells are survey-weighted % or mean (SD). Web Appendix E.")
+```
+:::
+
+### E3
+::: {.panel-tabset}
+#### Balance (SMD)
+```{r smd_e3}
+#| fig-height: 5
+smd_fig("E3")
+```
+#### Table 1
+```{r t1_e3}
+dt_show("nhanes_table1.csv", ex = "E3",
+        cols = c("Characteristic"="characteristic","Overall"="overall",
+                 "Never vaped"="unexposed","Ever-vaped"="exposed","SMD"="smd"),
+        page = 30, caption = "E3: ever vs never e-cigarette use. Cells are survey-weighted % or mean (SD). Note BMI is balanced across exposure (SMD 0.019). Web Appendix E.")
+```
+:::
+
+### E4
+::: {.panel-tabset}
+#### Balance (SMD)
+```{r smd_e4}
+#| fig-height: 5
+smd_fig("E4")
+```
+#### Table 1
+```{r t1_e4}
+dt_show("nhanes_table1.csv", ex = "E4",
+        cols = c("Characteristic"="characteristic","Overall"="overall",
+                 "No GDM"="unexposed","GDM history"="exposed","SMD"="smd"),
+        page = 30, caption = "E4: gestational-diabetes history vs none. Cells are survey-weighted % or mean (SD). Web Appendix E.")
+```
+:::
+
+:::
+
+## By question
+
+Each tab collects everything available for that question. The cross-example
+forest above shows all four side by side.
+
+::: {.panel-tabset}
+
+### E1: Short sleep → obesity
+
+Common exposure, excellent overlap: all arms agree and the design-aware interval
+is roughly a third wider than the naive one.
+
+```{r e1_forest}
+#| fig-height: 2.6
+#| fig-alt: "Forest plot of the five arms for the short-sleep and obesity question, with the primary Fully-Aware-CF interval emphasized; all arms agree and exclude zero."
+forest_fig("E1")
+```
+
+```{r e1_mi}
+dt_show("R06_mi_summary.csv", ex = "E1",
+        cols = c("Arm"="method","Risk diff."="b","SE"="se","df"="df",
+                 "RIV"="riv","FMI"="fmi","Lower"="lcl","Upper"="ucl"), page = 6,
+        caption = "Multiple imputation, m = 40 (Web Table S24).")
+```
+
+```{r e1_sens}
+dt_show("R09_sensitivity_arms.csv", ex = "E1",
+        cols = c("Adjustment"="adjust","Arm"="method","Risk diff."="b",
+                 "Lower"="lcl","Upper"="ucl"), page = 12,
+        caption = "Risk difference under alternative adjustment sets (Web Table S34).")
+```
+
+```{r e1_aipw}
+dt_show("R15_aipw_nhanes_E1.csv", ex = "E1",
+        cols = c("Arm"="method","Risk diff."="b","SE (jackknife)"="se_jkn",
+                 "SE (linearization)"="se_lin","Lower"="lcl","Upper"="ucl"), page = 5,
+        caption = "External survey-weighted AIPW cross-check (Web Table S28).")
+```
+
+### E2: Food insecurity → depression
+
+Ignoring the weights *understates* the association, though both intervals exclude
+zero — the weights change the magnitude, not the qualitative finding.
+
+```{r e2_forest}
+#| fig-height: 2.6
+#| fig-alt: "Forest plot of the five arms for the food-insecurity and depression question; all intervals exclude zero, with the design-aware ones wider and the primary Fully-Aware-CF interval emphasized."
+forest_fig("E2")
+```
+
+```{r e2_mi}
+dt_show("R06_mi_summary.csv", ex = "E2",
+        cols = c("Arm"="method","Risk diff."="b","SE"="se","df"="df",
+                 "RIV"="riv","FMI"="fmi","Lower"="lcl","Upper"="ucl"), page = 6,
+        caption = "Multiple imputation, m = 40 (Web Table S24).")
+```
+
+```{r e2_floor}
+dt_show("R17_floor_share.csv", ex = "E2",
+        cols = c("Exposure prev."="A_prev","Share clipped"="share_clip_w",
+                 "Exposed mass <0.05"="expmass05_w","Risk diff."="b","Lower"="lcl","Upper"="ucl"),
+        page = 5, caption = "Weighted share at the 0.05 propensity floor (Web Table S29).")
+```
+
+```{r e2_sens}
+dt_show("R09_sensitivity_arms.csv", ex = "E2",
+        cols = c("Adjustment"="adjust","Arm"="method","Risk diff."="b",
+                 "Lower"="lcl","Upper"="ucl"), page = 12,
+        caption = "Risk difference under alternative adjustment sets (Web Table S34).")
+```
+
+### E3: E-cigarette use → hypertension
+
+The naive `Non-Aware` analysis returns an apparently significant association, but
+survey-weighting alone moves the estimate to an interval covering zero — the
+apparent association is removed at the weighting step, not by cross-fitting.
+
+```{r e3_forest}
+#| fig-height: 2.6
+#| fig-alt: "Forest plot of the five arms for the e-cigarette and hypertension question; only the Non-Aware interval lies entirely to the right of zero while the design-aware intervals include zero, primary arm emphasized."
+forest_fig("E3")
+```
+
+```{r e3_mi}
+dt_show("R06_mi_summary.csv", ex = "E3",
+        cols = c("Arm"="method","Risk diff."="b","SE"="se","df"="df",
+                 "RIV"="riv","FMI"="fmi","Lower"="lcl","Upper"="ucl"), page = 6,
+        caption = "Multiple imputation, m = 40 (Web Table S24).")
+```
+
+```{r e3_div}
+dt_show("R05_point_divergence.csv", ex = "E3",
+        cols = c("Rung"="rung","Single-fit RD"="b_FA","Cross-fit RD"="b_CF",
+                 "Difference"="d_FA_CF"), page = 8, sort = c("Rung"),
+        caption = "Single-fit versus cross-fit point estimate by rung (Web Figure S4).")
+```
+
+```{r e3_floor}
+dt_show("R17_floor_share.csv", ex = "E3",
+        cols = c("Exposure prev."="A_prev","Share clipped"="share_clip_w",
+                 "Exposed mass <0.05"="expmass05_w","Risk diff."="b","Lower"="lcl","Upper"="ucl"),
+        page = 5, caption = "Weighted share at the 0.05 propensity floor (Web Table S29).")
+```
+
+### E4: GDM history → hypertension
+
+Rare exposure: the single-fit propensity reaches 0.003 (a near-violation of
+positivity) while the cross-fitted propensities are held at or above the 0.05
+floor, and the primary risk difference is near zero.
+
+```{r e4_forest}
+#| fig-height: 2.6
+#| fig-alt: "Forest plot of the five arms for the gestational-diabetes-history and hypertension question; the primary Fully-Aware-CF interval is emphasized and sits near zero."
+forest_fig("E4")
+```
+
+```{r e4_mi}
+dt_show("R06_mi_summary.csv", ex = "E4",
+        cols = c("Arm"="method","Risk diff."="b","SE"="se","df"="df",
+                 "RIV"="riv","FMI"="fmi","Lower"="lcl","Upper"="ucl"), page = 6,
+        caption = "Multiple imputation, m = 40 (Web Table S24).")
+```
+
+```{r e4_div}
+dt_show("R05_point_divergence.csv", ex = "E4",
+        cols = c("Rung"="rung","Single-fit RD"="b_FA","Cross-fit RD"="b_CF",
+                 "Difference"="d_FA_CF"), page = 8, sort = c("Rung"),
+        caption = "Single-fit versus cross-fit point estimate by rung (Web Figure S4).")
+```
+
+```{r e4_floor}
+dt_show("R17_floor_share.csv", ex = "E4",
+        cols = c("Exposure prev."="A_prev","Share clipped"="share_clip_w",
+                 "Exposed mass <0.05"="expmass05_w","Risk diff."="b","Lower"="lcl","Upper"="ucl"),
+        page = 5, caption = "Weighted share at the 0.05 propensity floor (Web Table S29).")
+```
+
+```{r e4_floorsens}
+dt_show("R17_floor_sensitivity.csv", ex = "E4",
+        cols = c("Floor"="floor","Arm"="method","Risk diff."="b",
+                 "Lower"="lcl","Upper"="ucl","Share clipped"="share_clip_w"), page = 6,
+        caption = "Propensity-floor sensitivity for the rare exposure (Web Table S30).")
+```
+
+```{r e4_sens}
+dt_show("R09_sensitivity_arms.csv", ex = "E4",
+        cols = c("Adjustment"="adjust","Arm"="method","Risk diff."="b",
+                 "Lower"="lcl","Upper"="ucl"), page = 12,
+        caption = "Risk difference under alternative adjustment sets (Web Table S34).")
+```
+
+:::

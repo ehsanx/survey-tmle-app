@@ -1,0 +1,75 @@
+---
+title: "Cross-Fitted Survey-Weighted TMLE"
+subtitle: "An interactive companion to the results behind the paper"
+---
+
+This site is the interactive companion to **Cross-Fitted Survey-Weighted TMLE
+with Design-Based Variance for Causal Machine Learning** (M. Ehsan Karim). It
+reproduces the paper's **simulation** and **NHANES** results: every figure and
+table here is rebuilt from the manuscript's frozen result files (multiple
+imputation, $m = 40$) and is labelled with its location in the paper — a
+main-text Table/Figure or a Web Table.
+
+::: {.callout-important}
+The manuscript and its Web Appendix are the **source of record**. The numbers
+here are frozen snapshots that match the paper; if anything ever differs, **the
+paper governs**. Code and frozen data:
+<https://github.com/ehsanx/Survey-TMLE-codes>. Rendered 2026-06-25.
+:::
+
+::: {.callout-tip collapse="true"}
+## What's reproduced here, and what's in the paper
+
+This site reproduces the paper's **results**: the simulation suite (Web Appendix
+D), the four NHANES analyses with multiple imputation and sensitivity checks (Web
+Appendices E–F), the per-example survey-weighted Table 1s (Web Appendix E), and
+the variance-method benchmark and compute landscape (Web Appendix G). The full
+**theory and proofs** (Web Appendix A) are summarised on the
+[Methods](methods.qmd) page rather than reproduced here — see the paper's Web
+Appendix for the complete statements.
+:::
+
+## The three messages
+
+```{=html}
+<div class="card-grid">
+  <a class="msg-card" href="nhanes.html">
+    <span class="msg-emoji">⚖️</span>
+    <strong>Weights → point estimate</strong>
+    <span>Ignoring the survey weights biases the point estimate — it targets a sample, not the population, quantity. (See NHANES.)</span>
+  </a>
+  <a class="msg-card" href="robustness.html">
+    <span class="msg-emoji">🧱</span>
+    <strong>Clustered variance → honest CI</strong>
+    <span>Ignoring stratification and clustering understates uncertainty: the interval is too narrow even when the point estimate is right. (See Robustness.)</span>
+  </a>
+  <a class="msg-card" href="simulation.html">
+    <span class="msg-emoji">🔁</span>
+    <strong>Cross-fitting → valid ML inference</strong>
+    <span>Flexible machine learning without cross-fitting under-covers once the learners cross a complexity boundary; PSU-level cross-fitting restores it. (See Simulation.)</span>
+  </a>
+</div>
+```
+
+## Explore
+
+- [**The simulation**](simulation.qmd) — the full Web Appendix D: the headline
+  coverage ladder, the complete results table, and every supporting experiment
+  (correctly-specified control, the cross-fitting isolation, double robustness,
+  the nuisance product rate, large-sample behaviour, type-I/power, the AIPW
+  benchmark, the deployable CV-vs-CF comparison, and other estimands).
+- [**The NHANES applications**](nhanes.qmd) — the population risk difference for
+  four contemporary questions (E1–E4) under five arms, plus multiple imputation,
+  the propensity-floor diagnostics, the single-fit-vs-cross-fit divergence, the
+  covariate-set sensitivity checks, and an external AIPW cross-check.
+- [**Robustness & sensitivity**](robustness.qmd) — informative selection, the
+  finite-population correction, a high-design-effect stress, and jackknife
+  versus linearization variance.
+- [**Methods**](methods.qmd) — a one-page, plain-language recap of the estimator
+  and the design-based variance.
+
+::: {.callout-note}
+The recommended estimator is **Fully-Aware-CF** (survey-weighted, cross-fitted at
+the primary-sampling-unit level). It is the arm the paper's theory covers for
+machine-learning nuisances.
+:::

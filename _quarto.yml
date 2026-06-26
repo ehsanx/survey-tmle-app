@@ -1,0 +1,41 @@
+project:
+  type: website
+  output-dir: docs
+  render:
+    - "*.qmd"
+
+website:
+  title: "Cross-Fitted Survey-Weighted TMLE"
+  description: "Interactive results companion to the paper: simulation + NHANES."
+  reader-mode: true
+  page-navigation: true
+  navbar:
+    background: primary
+    search: true
+    left:
+      - text: "Home"
+        href: index.qmd
+      - text: "Simulation"
+        href: simulation.qmd
+      - text: "NHANES"
+        href: nhanes.qmd
+      - text: "Robustness"
+        href: robustness.qmd
+      - text: "Methods"
+        href: methods.qmd
+    right:
+      - text: "About"
+        href: about.qmd
+  page-footer:
+    center: "Companion site to *Cross-Fitted Survey-Weighted TMLE with Design-Based Variance for Causal Machine Learning*. The manuscript and Web Appendix are the source of record."
+
+format:
+  html:
+    theme: [cosmo, custom.scss]
+    toc: true
+    code-fold: true
+    code-tools: true
+    fig-width: 9
+    fig-height: 5.5
+    page-layout: full
+    fig-cap-location: bottom
